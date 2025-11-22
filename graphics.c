@@ -44,8 +44,8 @@ void draw_status(Game* game) {
     mvwprintw(game->status_win.window, 1, 2, "Player: Skyblueborb | Level 1 | Life-force: %-3d",
               game->entities.swallow->hp);
     mvwprintw(game->status_win.window, 2, 2,
-              "Stars collected: PL | Star Quota: %d | Time left: %.1f", game->config.star_quota,
-              game->config.timer);
+              "Stars collected: %-3d | Star Quota: %-3d | Time left: %.1f", game->stars_collected,
+              game->config.star_quota, game->config.timer);
     mvwprintw(game->status_win.window, 3, 2, "Game speed: %-3d", game->game_speed);
     wattroff(game->status_win.window, A_BOLD);
     wnoutrefresh(game->status_win.window);

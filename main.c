@@ -45,18 +45,34 @@ void handle_input(Game* game, entity_t* swallow) {
 }
 
 void game_loop(Game* game) {
-    static int spawn_counter = 0;
-    int spawn_threshold = game->config.hunter_spawn * 10;
+    static int hunter_spawn_counter = 0;
+    int hunter_spawn_threshold = game->config.hunter_spawn * 10;
+    static int star_spawn_counter = 0;
+    static char update_stars = 0;
+    int star_spawn_threshold = game->config.star_spawn * 10;
     Swallow* swallow = game->entities.swallow;
     handle_input(game, &swallow->ent);
 
     process_swallow(game);
 
     process_hunters(game);
-    spawn_counter++;
-    if (spawn_counter == spawn_threshold) {
-        spawn_counter = 0;
+
+    collect_stars(game);
+    if (update_stars == 4) {
+        update_stars = -1;
+        move_stars(game);
+    }
+    update_stars++;
+
+    hunter_spawn_counter++;
+    if (hunter_spawn_counter == hunter_spawn_threshold) {
+        hunter_spawn_counter = 0;
         spawn_hunter(game);
+    }
+    star_spawn_counter++;
+    if (star_spawn_counter == star_spawn_threshold) {
+        star_spawn_counter = 0;
+        spawn_star(game);
     }
 
     draw_status(game);

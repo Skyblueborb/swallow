@@ -10,7 +10,7 @@ static const ConfigMapEntry global_key_map[] = {
         {"window_width", offsetof(conf_t, window_width), TYPE_INT},
         {"star_quota", offsetof(conf_t, star_quota), TYPE_INT},
         {"timer", offsetof(conf_t, timer), TYPE_FLOAT},
-        {"start_spawn", offsetof(conf_t, start_spawn), TYPE_FLOAT},
+        {"star_spawn", offsetof(conf_t, star_spawn), TYPE_FLOAT},
         {"hunter_spawn", offsetof(conf_t, hunter_spawn), TYPE_FLOAT},
         {"min_speed", offsetof(conf_t, min_speed), TYPE_INT},
         {"max_speed", offsetof(conf_t, max_speed), TYPE_INT},

@@ -3,7 +3,7 @@ window_width 80
 
 star_quota   160
 timer        90.5
-start_spawn  3.0
+star_spawn  15
 hunter_spawn 10
 min_speed    1
 max_speed    10

@@ -57,6 +57,16 @@ static void setup_hunter_physics(Hunter* hun, int x, int y, direction_t dir) {
     change_entity_direction(&hun->ent, dir, hun->ent.speed);
 }
 
+static int is_touching(entity_t* s, entity_t* t) {
+    int tolerance = 1;
+
+    if (s->x < t->x + t->width + tolerance && s->x + s->width > t->x - tolerance &&
+        s->y < t->y + t->height + tolerance && s->y + s->height > t->y - tolerance) {
+        return 1;
+    }
+    return 0;
+}
+
 void spawn_hunter(Game* game) {
     int t_idx = rand() % 5;
     direction_t dir = (direction_t)(rand() % 4);
@@ -74,6 +84,28 @@ void spawn_hunter(Game* game) {
 
     new_hunter->next = game->entities.hunters;
     game->entities.hunters = new_hunter;
+}
+
+void spawn_star(Game* game) {
+    Star* star = malloc(sizeof(Star));
+    if (!star) return;
+
+    star->ent.width = 1;
+    star->ent.height = 1;
+    for (int i = 0; i < NUM_DIRECTIONS; i++) star->ent.sprites[i] = "*";
+
+    star->ent.speed = (rand() % 3) + 1;
+
+    int max_c = game->main_win.cols - star->ent.width - 2;
+    if (max_c <= 0) max_c = 1;
+
+    star->ent.x = 2 + (rand() % max_c);
+    star->ent.y = 1;
+
+    change_entity_direction(&star->ent, DIR_DOWN, star->ent.speed);
+
+    star->next = game->entities.stars;
+    game->entities.stars = star;
 }
 
 collision_t process_entity_tick(Game* game, entity_t* ent, char representation) {
@@ -107,34 +139,133 @@ Hunter* remove_hunter(Game* game, Hunter* current, Hunter* prev) {
     return next_node;
 }
 
+Star* remove_star(Game* game, Star* current, Star* prev) {
+    remove_entity(game, &current->ent);
+
+    Star* to_free = current;
+    Star* next_node = current->next;
+
+    if (prev == NULL) {
+        game->entities.stars = next_node;
+    } else {
+        prev->next = next_node;
+    }
+
+    free(to_free);
+    return next_node;
+}
+
+void collect_stars(Game* game) {
+    Star* current = game->entities.stars;
+    Star* prev = NULL;
+    Swallow* swallow = game->entities.swallow;
+
+    while (current != NULL) {
+        if (is_touching(&current->ent, &swallow->ent)) {
+            game->stars_collected++;
+            current = remove_star(game, current, prev);
+        } else {
+            prev = current;
+            current = current->next;
+        }
+    }
+}
+
+void move_stars(Game* game) {
+    Star* current = game->entities.stars;
+    Star* prev = NULL;
+    Swallow* swallow = game->entities.swallow;
+
+    while (current != NULL) {
+        int s_top = current->ent.y;
+        int s_bot = current->ent.y + current->ent.height + current->ent.speed;
+
+        int t_top = swallow->ent.y;
+        int t_bot = swallow->ent.y + swallow->ent.height;
+
+        if (s_bot >= t_top && s_top <= t_bot &&
+            current->ent.x < swallow->ent.x + swallow->ent.width &&
+            current->ent.x + current->ent.width > swallow->ent.x) {
+            game->stars_collected++;
+            current = remove_star(game, current, prev);
+            continue;
+        }
+
+        collision_t ret = process_entity_tick(game, &current->ent, STAR);
+
+        if (ret != EMPTY) {
+            if (ret == SWALLOW) {
+                game->stars_collected++;
+            }
+            current = remove_star(game, current, prev);
+        } else {
+            prev = current;
+            current = current->next;
+        }
+    }
+}
+
+static int resolve_hunter_collision(Game* game, Hunter** curr, Hunter* prev, collision_t ret) {
+    Hunter* h = *curr;
+    if (ret != EMPTY) {
+        change_entity_direction(&h->ent, get_opposite_direction(h->ent.direction), h->ent.speed);
+        h->bounces--;
+
+        if (ret == HUNTER || ret == SWALLOW) {
+            if (ret == SWALLOW) game->entities.swallow->hp -= 5;
+            *curr = remove_hunter(game, h, prev);
+            return 1;
+        }
+
+        h->bounces--;
+    }
+
+    if (h->bounces <= 0) {
+        *curr = remove_hunter(game, h, prev);
+        return 1;
+    }
+    return 0;
+}
+
 void process_hunters(Game* game) {
     Hunter* current = game->entities.hunters;
     Hunter* prev = NULL;
+
     while (current != NULL) {
         collision_t ret = process_entity_tick(game, &current->ent, HUNTER);
 
-        if (ret != EMPTY) {
-            change_entity_direction(&current->ent, get_opposite_direction(current->ent.direction),
-                                    current->ent.speed);
-            current->bounces--;
-            switch (ret) {
-                case HUNTER:
-                    remove_hunter(game, current, prev);
-                    break;
-                case SWALLOW:
-                    game->entities.swallow->hp -= 5;
-                    remove_hunter(game, current, prev);
-                    break;
-                case WALL:
-                default:
-                    current->bounces--;
-            }
-        } else if (current->bounces <= 0) {
-            current = remove_hunter(game, current, prev);
+        if (resolve_hunter_collision(game, &current, prev, ret)) {
             continue;
         }
+
         prev = current;
         current = current->next;
+    }
+}
+
+static void handle_swallow_star(Game* game, Swallow* s) {
+    Star* prev = NULL;
+    int tx = s->ent.x + s->ent.dx;
+    int ty = s->ent.y + s->ent.dy;
+
+    Star* target = find_star_collision(game, &prev, tx, ty, s->ent.width, s->ent.height);
+
+    if (target) {
+        game->stars_collected++;
+        remove_star(game, target, prev);
+    }
+}
+
+static void handle_swallow_hunter(Game* game, Swallow* s) {
+    s->hp -= 5;
+    Hunter* prev = NULL;
+    int tx = s->ent.x + s->ent.dx;
+    int ty = s->ent.y + s->ent.dy;
+
+    Hunter* target = find_hunter_collision(game, &prev, tx, ty, s->ent.width, s->ent.height);
+
+    if (target) {
+        remove_hunter(game, target, prev);
     }
 }
 
@@ -142,23 +273,9 @@ void process_swallow(Game* game) {
     Swallow* s = game->entities.swallow;
     collision_t ret = process_entity_tick(game, &s->ent, SWALLOW);
 
-    if (ret != EMPTY) {
-        switch (ret) {
-            case HUNTER:
-                s->hp -= 5;
-                Hunter* prev = NULL;
-                Hunter* to_free =
-                        find_hunter_collision(game, &prev, s->ent.x + s->ent.dx,
-                                              s->ent.y + s->ent.dy, s->ent.width, s->ent.height);
-
-                if (to_free) {
-                    remove_hunter(game, to_free, prev);
-                }
-                break;
-            case SWALLOW:
-            case WALL:
-            default:
-                break;
-        }
+    if (ret == STAR) {
+        handle_swallow_star(game, s);
+    } else if (ret == HUNTER) {
+        handle_swallow_hunter(game, s);
     }
 }

@@ -19,10 +19,9 @@ void update_occupancy_map(char** occupancy_map, int rows, int cols, entity_t* en
     }
 }
 
-// Returns 0 for good positions, 1 for WALL, 2 for HUNTER, 3 for Swallow
 collision_t check_occupancy_map(char** occupancy_map, int rows, int cols, int x, int y, int width,
                                 int height) {
-    if (x <= 0 || y <= 0 || x + width >= cols - 1 || y + height >= rows) {
+    if (x <= 0 || y <= 0 || x + width >= cols || y + height >= rows) {
         return WALL;  // Collision with Border Walls
     }
     for (int i = y; i < y + height; i++) {
@@ -121,6 +120,32 @@ Hunter* find_hunter_collision(Game* game, Hunter** prev_out, int area_x, int are
 
         last = h;
         h = h->next;
+    }
+    return NULL;
+}
+
+Star* find_star_collision(Game* game, Star** prev_out, int area_x, int area_y, int area_w,
+                          int area_h) {
+    Star* s = game->entities.stars;
+    Star* last = NULL;
+
+    while (s != NULL) {
+        int s_left = s->ent.x;
+        int s_right = s->ent.x + s->ent.width;
+        int s_top = s->ent.y;
+        int s_bottom = s->ent.y + s->ent.height;
+
+        int t_left = area_x;
+        int t_right = area_x + area_w;
+        int t_top = area_y;
+        int t_bottom = area_y + area_h;
+
+        if (s_left < t_right && s_right > t_left && s_top < t_bottom && s_bottom > t_top) {
+            if (prev_out) *prev_out = last;
+            return s;
+        }
+        last = s;
+        s = s->next;
     }
     return NULL;
 }

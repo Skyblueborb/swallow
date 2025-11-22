@@ -71,7 +71,7 @@ typedef struct {
     int window_width;
     int star_quota;
     float timer;
-    float start_spawn;
+    float star_spawn;
     float hunter_spawn;
     int min_speed;
     int max_speed;
@@ -104,6 +104,7 @@ typedef struct {
     char **occupancy_map;
     float time_left;
     int game_speed;
+    int stars_collected;
     GameEntities entities;
 } Game;
 
