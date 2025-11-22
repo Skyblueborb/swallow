@@ -1,10 +1,17 @@
-SRC = main.c
+SRC = main.c utils.c conf.c graphics.c physics.c entity.c
 CC = clang
+
+NCURSES_PREFIX = $(shell brew --prefix ncurses)
+
+CFLAGS = -O0 -g -Wall -Werror -I$(NCURSES_PREFIX)/include
+LDFLAGS = -L$(NCURSES_PREFIX)/lib
+
+LDLIBS = -lncursesw
 
 all: swallow
 
 swallow: $(SRC)
-	$(CC) -O0 -g -Wall -Werror -Wextra $(SRC) -o swallow -lncurses
+	$(CC) $(CFLAGS) $(LDFLAGS) $(SRC) -o swallow $(LDLIBS)
 
 clean:
 	rm -f swallow

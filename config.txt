@@ -1,0 +1,66 @@
+window_height 40
+window_width 80
+
+star_quota   160
+timer        90.5
+start_spawn  3.0
+hunter_spawn 10
+min_speed    1
+max_speed    10
+
+hunter_template {
+    width   1
+    height  2
+    bounces 3
+    speed   1
+    sprite_up    ^#
+    sprite_down  v#
+    sprite_left  #<
+    sprite_right #>
+}
+
+hunter_template {
+    width   2
+    height  1
+    bounces 5
+    speed   1
+    sprite_up    -^
+    sprite_down  -v
+    sprite_left  <-
+    sprite_right ->
+}
+
+hunter_template {
+    width   1
+    height  3
+    bounces 4
+    speed   1
+    sprite_up    ^||
+    sprite_down  ||v
+    sprite_left  <--
+    sprite_right -->
+}
+
+hunter_template {
+    width   3
+    height  1
+    bounces 5
+    speed   1
+    sprite_up    <^>
+    sprite_down  -v-
+    sprite_left  (<-
+    sprite_right ->)
+}
+
+hunter_template {
+    width   2
+    height  2
+    bounces 5
+    speed   1
+    sprite_up    ^^()
+    sprite_down  vv()
+    sprite_left  o<~~
+    sprite_right ~~>o
+}
+
+
