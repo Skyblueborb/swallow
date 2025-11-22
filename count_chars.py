@@ -12,15 +12,10 @@ def strip_comments_and_strings(text):
     Replaces comments and strings with spaces to preserve
     byte/char offsets while removing distractions for the parser.
     """
-    # Regex to match:
-    # 1. Strings (double or single quotes)
-    # 2. Block comments /* ... */
-    # 3. Line comments // ...
     pattern = r"(\"(\\.|[^\"\\])*\"|'(\\.|[^'\\])*')|(/\*.*?\*/|//[^\r\n]*$)"
     regex = re.compile(pattern, re.MULTILINE | re.DOTALL)
 
     def _replacer(match):
-        # Replace match with spaces of the same length
         return " " * len(match.group(0))
 
     return regex.sub(_replacer, text)
@@ -28,16 +23,11 @@ def strip_comments_and_strings(text):
 def get_context_header(text, start_index):
     """
     Looks backwards from the opening brace '{' to find the function signature.
-    Stop at the previous '}' or ';'.
     """
-    # Look back up to 500 chars
     lookback_limit = max(0, start_index - 500)
     preceding_text = text[lookback_limit:start_index]
-
-    # Split by ';' or '}' to find the immediate statement before the brace
-    # We reverse to find the closest one
     tokens = re.split(r'[;}]', preceding_text)
-    header = tokens[-1] # The last chunk is our candidate
+    header = tokens[-1]
     return header.strip()
 
 def is_function_definition(header):
@@ -47,33 +37,18 @@ def is_function_definition(header):
     if not header:
         return False
 
-    # 1. Ignore Control Structures
     keywords = ['if', 'while', 'for', 'switch', 'do', 'else']
-    # Check if the header ends with a keyword (e.g. "else")
-    # or starts with a keyword followed by parens (e.g. "if (x)")
     for kw in keywords:
-        # Case: "if (...)"
         if header.startswith(kw + " ") or header.startswith(kw + "("):
             return False
-        # Case: "else"
         if header == kw:
             return False
 
-    # 2. Ignore Assignments (Arrays/Structs) e.g., "int x[] ="
     if header.endswith('='):
         return False
 
-    # 3. Must likely end with a closing parenthesis ')'
-    # (Standard C functions: "void foo(int x)")
-    # We strip whitespace first.
-    if not header.endswith(')'):
-        # Special handling for K&R C or obscure formatting,
-        # but usually if it doesn't end in ')', it's not a function header.
-        # Exception: "void func(void) const" (C++ish) or macros.
-        # But for your specific error, the header ended in ';',
-        # which we already filtered in get_context_header by splitting.
-        pass
-
+    # Note: Standard C functions usually end with ')', but macros or K&R might not.
+    # We allow loose matching here as long as it isn't a control structure.
     return True
 
 def analyze_file(filepath):
@@ -84,7 +59,7 @@ def analyze_file(filepath):
         print(f"Skipping {filepath}: {e}")
         return
 
-    # Use clean content for parsing braces, but raw_content for reporting
+    # clean_content has comments/strings replaced by spaces
     clean_content = strip_comments_and_strings(raw_content)
 
     brace_level = 0
@@ -104,14 +79,13 @@ def analyze_file(filepath):
                 end_index = i
 
                 # 1. CHECK AFTER: Is it a struct/enum?
-                # Look ahead for a semicolon (ignoring whitespace)
                 is_data_structure = False
                 for k in range(end_index + 1, len(clean_content)):
                     if clean_content[k].isspace():
                         continue
                     if clean_content[k] == ';':
                         is_data_structure = True
-                    break # Stop checking after first non-space char
+                    break
 
                 if is_data_structure:
                     start_index = -1
@@ -120,34 +94,45 @@ def analyze_file(filepath):
                 # 2. CHECK BEFORE: Analyze the header
                 header = get_context_header(raw_content, start_index)
 
-                # If the header is empty or looks like "if (..)", skip
                 if not is_function_definition(header):
                     start_index = -1
                     continue
 
-                # 3. Calculate Length
-                func_length = (end_index - start_index) + 1
+                # 3. Calculate Length (IGNORING WHITESPACE)
+                # Extract the raw body segment
+                raw_body = raw_content[start_index:end_index+1]
+
+                # Strip comments/strings specifically for the count (optional,
+                # but recommended if "code length" implies ignoring comments too).
+                # If you want to count comment text but ignore whitespace, use raw_body.
+                # If you want to count only CODE text and ignore whitespace, use clean_body.
+                clean_body = clean_content[start_index:end_index+1]
+
+                # Remove all whitespace (\n, \t, space)
+                # Using clean_body means we don't count text inside comments,
+                # but we do count the spaces that replaced them.
+                # To be strictly "code characters":
+                text_to_count = re.sub(r'\s+', '', clean_body)
+
+                func_length = len(text_to_count)
 
                 if func_length > MAX_CHAR_LENGTH:
-                    # Try to extract a pretty name
-                    # Find the word before the opening parenthesis
                     match = re.search(r'(\w+)\s*\(', header)
                     func_name = match.group(1) if match else "Unknown"
 
-                    # If "Unknown", use the whole header for context (truncated)
                     if func_name == "Unknown":
                         func_name = header[-50:].replace('\n', ' ')
 
                     print(f"[ALERT] {filepath}")
                     print(f"    Function: {func_name}(...)")
-                    print(f"    Length:   {func_length} chars (Limit: {MAX_CHAR_LENGTH})")
+                    print(f"    Length:   {func_length} non-whitespace chars (Limit: {MAX_CHAR_LENGTH})")
                     print("-" * 40)
 
                 start_index = -1
 
 def main():
     target = sys.argv[1] if len(sys.argv) > 1 else SEARCH_DIR
-    print(f"Scanning {os.path.abspath(target)} for .c functions > {MAX_CHAR_LENGTH} chars...\n")
+    print(f"Scanning {os.path.abspath(target)} for .c functions > {MAX_CHAR_LENGTH} non-whitespace chars...\n")
 
     count = 0
     for root, _, files in os.walk(target):

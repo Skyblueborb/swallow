@@ -14,6 +14,7 @@ static const ConfigMapEntry global_key_map[] = {
         {"hunter_spawn", offsetof(conf_t, hunter_spawn), TYPE_FLOAT},
         {"min_speed", offsetof(conf_t, min_speed), TYPE_INT},
         {"max_speed", offsetof(conf_t, max_speed), TYPE_INT},
+        {"seed", offsetof(conf_t, seed), TYPE_INT},
 };
 
 static const ConfigMapEntry hunter_key_map[] = {

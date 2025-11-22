@@ -45,7 +45,7 @@ void draw_status(Game* game) {
               game->entities.swallow->hp);
     mvwprintw(game->status_win.window, 2, 2,
               "Stars collected: %-3d | Star Quota: %-3d | Time left: %.1f", game->stars_collected,
-              game->config.star_quota, game->config.timer);
+              game->config.star_quota, game->time_left);
     mvwprintw(game->status_win.window, 3, 2, "Game speed: %-3d", game->game_speed);
     wattroff(game->status_win.window, A_BOLD);
     wnoutrefresh(game->status_win.window);

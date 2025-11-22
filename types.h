@@ -77,6 +77,7 @@ typedef struct {
     float hunter_spawn;
     int min_speed;
     int max_speed;
+    int seed;
     HunterTypes hunter_templates[5];
 } conf_t;
 

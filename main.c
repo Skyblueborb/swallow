@@ -45,6 +45,9 @@ void handle_input(Game* game, entity_t* swallow) {
 }
 
 void game_loop(Game* game) {
+    unsigned int sleep_us = 66666 / game->game_speed;
+    float delta_seconds = (float)sleep_us / 1000000.0f;
+
     static int hunter_spawn_counter = 0;
     int hunter_spawn_threshold = game->config.hunter_spawn * 10;
     static int star_spawn_counter = 0;
@@ -76,11 +79,18 @@ void game_loop(Game* game) {
     }
 
     if (swallow->hp <= 0) {
-        exit(1);
+        game->running = 0;
     }
 
     if (game->stars_collected >= game->config.star_quota) {
-        exit(1);
+        game->running = 0;
+    }
+
+    game->time_left -= delta_seconds;
+
+    if (game->time_left <= 0) {
+        game->time_left = 0;
+        game->running = 0;
     }
 
     draw_status(game);
@@ -88,17 +98,18 @@ void game_loop(Game* game) {
 
     doupdate();
 
-    usleep(66666 / game->game_speed);
+    usleep(sleep_us);
 }
 
 int main() {
     setlocale(LC_ALL, "");
-    srand(time(NULL));
     Game game = {0};
     game.config = read_config("config.txt");
     game.running = 1;
     game.game_speed = 3;
+    game.time_left = game.config.timer;
 
+    srand(game.config.seed);
     init_curses();
 
     setup_windows(&game.main_win, &game.status_win, &game.config);
