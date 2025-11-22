@@ -1,7 +1,7 @@
 window_height 40
 window_width 80
 
-star_quota   160
+star_quota   10
 timer        90.5
 star_spawn  15
 hunter_spawn 10
@@ -13,6 +13,7 @@ hunter_template {
     height  2
     bounces 3
     speed   1
+    damage 5
     sprite_up    ^#
     sprite_down  v#
     sprite_left  #<
@@ -24,6 +25,7 @@ hunter_template {
     height  1
     bounces 5
     speed   1
+    damage 5
     sprite_up    -^
     sprite_down  -v
     sprite_left  <-
@@ -35,6 +37,7 @@ hunter_template {
     height  3
     bounces 4
     speed   1
+    damage 5
     sprite_up    ^||
     sprite_down  ||v
     sprite_left  <||
@@ -46,6 +49,7 @@ hunter_template {
     height  1
     bounces 5
     speed   1
+    damage 5
     sprite_up    <^>
     sprite_down  -v-
     sprite_left  (<-
@@ -57,6 +61,7 @@ hunter_template {
     height  2
     bounces 5
     speed   1
+    damage 10
     sprite_up    ^^()
     sprite_down  vv()
     sprite_left  o<~~

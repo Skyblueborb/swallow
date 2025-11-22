@@ -75,6 +75,14 @@ void game_loop(Game* game) {
         spawn_star(game);
     }
 
+    if (swallow->hp <= 0) {
+        exit(1);
+    }
+
+    if (game->stars_collected >= game->config.star_quota) {
+        exit(1);
+    }
+
     draw_status(game);
     draw_main(game);
 

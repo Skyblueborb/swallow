@@ -46,6 +46,7 @@ static Hunter* init_hunter_data(Game* game, int template_idx) {
     hun->ent.height = t->height;
     hun->ent.speed = t->speed;
     hun->bounces = t->bounces;
+    hun->damage = t->damage;
     hun->next = NULL;
 
     return hun;
@@ -212,7 +213,7 @@ static int resolve_hunter_collision(Game* game, Hunter** curr, Hunter* prev, col
         h->bounces--;
 
         if (ret == HUNTER || ret == SWALLOW) {
-            if (ret == SWALLOW) game->entities.swallow->hp -= 5;
+            if (ret == SWALLOW) game->entities.swallow->hp -= h->damage;
             *curr = remove_hunter(game, h, prev);
             return 1;
         }
@@ -257,12 +258,13 @@ static void handle_swallow_star(Game* game, Swallow* s) {
 }
 
 static void handle_swallow_hunter(Game* game, Swallow* s) {
-    s->hp -= 5;
     Hunter* prev = NULL;
     int tx = s->ent.x + s->ent.dx;
     int ty = s->ent.y + s->ent.dy;
 
     Hunter* target = find_hunter_collision(game, &prev, tx, ty, s->ent.width, s->ent.height);
+
+    s->hp -= target->damage;
 
     if (target) {
         remove_hunter(game, target, prev);

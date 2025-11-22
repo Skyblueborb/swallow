@@ -55,6 +55,7 @@ typedef struct Star {
 typedef struct Hunter {
     entity_t ent;
     int bounces;
+    int damage;
     struct Hunter *next;
 } Hunter;
 
@@ -62,6 +63,7 @@ typedef struct HunterTypes {
     int width, height;
     int bounces;
     int speed;
+    int damage;
     char* sprites[NUM_DIRECTIONS];
 } HunterTypes;
 

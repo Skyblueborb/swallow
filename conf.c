@@ -21,6 +21,7 @@ static const ConfigMapEntry hunter_key_map[] = {
         {"height", offsetof(HunterTypes, height), TYPE_INT},
         {"bounces", offsetof(HunterTypes, bounces), TYPE_INT},
         {"speed", offsetof(HunterTypes, speed), TYPE_INT},
+        {"damage", offsetof(HunterTypes, damage), TYPE_INT},
 };
 
 static const int num_global_keys = sizeof(global_key_map) / sizeof(global_key_map[0]);
