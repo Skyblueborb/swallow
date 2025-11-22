@@ -1,5 +1,3 @@
-#include <stddef.h>
-#include <stdio.h>
 #include "types.h"
 
 void draw_sprite(Game* game, entity_t* entity) {
@@ -26,12 +24,6 @@ void draw_sprite(Game* game, entity_t* entity) {
     wnoutrefresh(win);
 }
 
-void swap_height_width(entity_t* entity) {
-    int buf = entity->width;
-    entity->width = entity->height;
-    entity->height = buf;
-}
-
 void remove_sprite(Game* game, entity_t* entity) {
     WINDOW* win = game->main_win.window;
 
@@ -46,16 +38,11 @@ void remove_sprite(Game* game, entity_t* entity) {
     wnoutrefresh(win);
 }
 
-void redraw_sprite(Game* game, entity_t* entity) {
-    remove_sprite(game, entity);
-    draw_sprite(game, entity);
-    wnoutrefresh(game->main_win.window);
-}
-
 void draw_status(Game* game) {
     box(game->status_win.window, 0, 0);
     wattron(game->status_win.window, A_BOLD);
-    mvwprintw(game->status_win.window, 1, 2, "Player: Skyblueborb | Level 1 | Life-force: %-3d", game->entities.swallow->hp);
+    mvwprintw(game->status_win.window, 1, 2, "Player: Skyblueborb | Level 1 | Life-force: %-3d",
+              game->entities.swallow->hp);
     mvwprintw(game->status_win.window, 2, 2,
               "Stars collected: PL | Star Quota: %d | Time left: %.1f", game->config.star_quota,
               game->config.timer);

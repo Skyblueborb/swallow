@@ -1,6 +1,7 @@
 #include "conf.h"
-#include <stdbool.h>
 #include <stddef.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include "types.h"
 
@@ -25,14 +26,39 @@ static const ConfigMapEntry hunter_key_map[] = {
 static const int num_global_keys = sizeof(global_key_map) / sizeof(global_key_map[0]);
 static const int num_hunter_keys = sizeof(hunter_key_map) / sizeof(hunter_key_map[0]);
 
-void strip_newline(char* str) {
+static void strip_newline(char* str) {
     size_t len = strlen(str);
     if (len > 0 && str[len - 1] == '\n') {
         str[len - 1] = '\0';
     }
 }
 
-void parse_values(conf_t* config, int hunter_idx, const char* key, const char* value) {
+static void parse_sprite(conf_t* config, int hunter_idx, const char* key, const char* value) {
+    HunterTypes* hunter = &config->hunter_templates[hunter_idx];
+    size_t size = hunter->width * hunter->height + 1;
+    if (hunter->sprites[0] == NULL) {
+        for (int i = 0; i < NUM_DIRECTIONS; i++) {
+            hunter->sprites[i] = malloc(size);
+        }
+    }
+
+    switch (key[7]) {
+        case 'u':
+            strncpy(hunter->sprites[DIR_UP], value, size);
+            break;
+        case 'd':
+            strncpy(hunter->sprites[DIR_DOWN], value, size);
+            break;
+        case 'l':
+            strncpy(hunter->sprites[DIR_LEFT], value, size);
+            break;
+        case 'r':
+            strncpy(hunter->sprites[DIR_RIGHT], value, size);
+            break;
+    }
+}
+
+static void parse_values(conf_t* config, int hunter_idx, const char* key, const char* value) {
     void* base_ptr;
     const ConfigMapEntry* map;
     int count;
@@ -64,32 +90,7 @@ void parse_values(conf_t* config, int hunter_idx, const char* key, const char* v
     }
 }
 
-void parse_sprite(conf_t* config, int hunter_idx, const char* key, const char* value) {
-    HunterTypes* hunter = &config->hunter_templates[hunter_idx];
-    size_t size = hunter->width * hunter->height + 1;
-    if (hunter->sprites[0] == NULL) {
-        for (int i = 0; i < NUM_DIRECTIONS; i++) {
-            hunter->sprites[i] = malloc(size);
-        }
-    }
-
-    switch (key[7]) {
-        case 'u':
-            strncpy(hunter->sprites[DIR_UP], value, size);
-            break;
-        case 'd':
-            strncpy(hunter->sprites[DIR_DOWN], value, size);
-            break;
-        case 'l':
-            strncpy(hunter->sprites[DIR_LEFT], value, size);
-            break;
-        case 'r':
-            strncpy(hunter->sprites[DIR_RIGHT], value, size);
-            break;
-    }
-}
-
-void process_config_line(const char* line, conf_t* config, int* hunter_idx) {
+static void process_config_line(const char* line, conf_t* config, int* hunter_idx) {
     char key[100] = {0}, value[100] = {0};
     int items = sscanf(line, "%99s %99s", key, value);
 
@@ -101,7 +102,6 @@ void process_config_line(const char* line, conf_t* config, int* hunter_idx) {
     } else {
         parse_values(config, *hunter_idx, key, value);
     }
-    return;
 }
 
 conf_t read_config(char* filename) {

@@ -37,8 +37,8 @@ hunter_template {
     speed   1
     sprite_up    ^||
     sprite_down  ||v
-    sprite_left  <--
-    sprite_right -->
+    sprite_left  <||
+    sprite_right >||
 }
 
 hunter_template {

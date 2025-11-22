@@ -94,28 +94,40 @@ void change_game_speed(Game* game, increment_t increment) {
 }
 
 void init_swallow(Game* game, Swallow* swallow) {
-    entity_t *s = &swallow->ent;
+    entity_t* s = &swallow->ent;
 
     swallow->hp = 100;
-    s->width  = 3;
+    s->width = 3;
     s->height = 3;
     s->x = game->main_win.cols / 2;
     s->y = game->main_win.rows / 2;
     s->speed = 1;
     s->direction = DIR_RIGHT;
-    s->sprites[DIR_UP]    = ".^."  "/o\\" ".Y.";
-    s->sprites[DIR_DOWN]  = "_w_"  "\\o/" ".v.";
-    s->sprites[DIR_LEFT]  = "./."  "<o="  ".\\.";
-    s->sprites[DIR_RIGHT] = ".\\." "=o>"  "./.";
+    s->sprites[DIR_UP] =
+            ".^."
+            "/o\\"
+            ".Y.";
+    s->sprites[DIR_DOWN] =
+            "_w_"
+            "\\o/"
+            ".v.";
+    s->sprites[DIR_LEFT] =
+            "./."
+            "<o="
+            ".\\.";
+    s->sprites[DIR_RIGHT] =
+            ".\\."
+            "=o>"
+            "./.";
 }
 
-int count_hunters(Game *game) {
+int count_hunters(Game* game) {
     int count = 0;
-    for (Hunter *h = game->entities.hunters; h; h = h->next) count++;
+    for (Hunter* h = game->entities.hunters; h; h = h->next) count++;
     return count;
 }
 
-void free_hunters(Game *game) {
+void free_hunters(Game* game) {
     Hunter* h = game->entities.hunters;
     while (h != NULL) {
         Hunter* next = h->next;

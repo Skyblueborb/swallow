@@ -14,7 +14,7 @@
 #include "types.h"
 #include "utils.h"
 
-void handle_input(Game* game, entity_t *swallow) {
+void handle_input(Game* game, entity_t* swallow) {
     int ch = tolower(getch());
 
     if (ch != ERR) {
@@ -44,6 +44,29 @@ void handle_input(Game* game, entity_t *swallow) {
     }
 }
 
+void game_loop(Game* game) {
+    static int spawn_counter = 0;
+    int spawn_threshold = game->config.hunter_spawn * 10;
+    Swallow* swallow = game->entities.swallow;
+    handle_input(game, &swallow->ent);
+
+    process_swallow(game);
+
+    process_hunters(game);
+    spawn_counter++;
+    if (spawn_counter == spawn_threshold) {
+        spawn_counter = 0;
+        spawn_hunter(game);
+    }
+
+    draw_status(game);
+    draw_main(game);
+
+    doupdate();
+
+    usleep(66666 / game->game_speed);
+}
+
 int main() {
     setlocale(LC_ALL, "");
     srand(time(NULL));
@@ -62,29 +85,8 @@ int main() {
 
     game.entities.swallow = &swallow;
 
-    int spawn_counter = 0;
-    int spawn_threshold = game.config.hunter_spawn * 10;
-
-    spawn_hunter(&game);
-
     while (game.running) {
-        handle_input(&game, &swallow.ent);
-
-        process_swallow(&game);
-
-        process_hunters(&game);
-        spawn_counter++;
-        if(spawn_counter == spawn_threshold) {
-            spawn_counter = 0;
-            spawn_hunter(&game);
-        }
-
-        draw_status(&game);
-        draw_main(&game);
-
-        doupdate();
-
-        usleep(66666 / game.game_speed);
+        game_loop(&game);
     }
 
     delwin(game.main_win.window);

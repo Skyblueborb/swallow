@@ -11,6 +11,7 @@ LDLIBS = -lncursesw
 all: swallow
 
 swallow: $(SRC)
+	python3 count_chars.py
 	$(CC) $(CFLAGS) $(LDFLAGS) $(SRC) -o swallow $(LDLIBS)
 
 clean:
