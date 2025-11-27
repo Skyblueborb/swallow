@@ -84,6 +84,10 @@ void spawn_hunter(Game* game) {
     Hunter* new_hunter = init_hunter_data(game, t_idx);
     if (!new_hunter) return;
 
+    float elapsed = game->config.timer - game->time_left;
+    int bonus_bounces = (int)(elapsed / 10.0f);
+    new_hunter->bounces += bonus_bounces;
+
     setup_hunter_physics(new_hunter, x, y, dir);
 
     new_hunter->next = game->entities.hunters;

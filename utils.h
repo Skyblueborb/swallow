@@ -13,5 +13,6 @@ int count_hunters(Game *game);
 void free_hunters(Game *game);
 void get_username(Game *game);
 void strip_newline(char* str);
+char* select_level(Game *game);
 
 #endif // UTILS_H

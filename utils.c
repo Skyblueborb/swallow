@@ -1,4 +1,5 @@
 #include <string.h>
+#include <dirent.h>
 #include "utils.h"
 #include "types.h"
 
@@ -232,4 +233,71 @@ void free_hunters(Game* game) {
         free(h);
         h = next;
     }
+}
+
+static int load_levels(char ***files) {
+    DIR *d = opendir("levels");
+    int count = 0;
+    struct dirent *dir;
+
+    if (!d) return 0;
+
+    while ((dir = readdir(d))) {
+        if (strstr(dir->d_name, ".conf")) {
+            char **tmp = realloc(*files, sizeof(char*) * (count + 1));
+            if (tmp) {
+                *files = tmp;
+                (*files)[count++] = strdup(dir->d_name);
+            }
+        }
+    }
+    closedir(d);
+    return count;
+}
+
+char* select_level(Game *game) {
+    char **files = NULL;
+    int count = load_levels(&files);
+
+    if (count == 0) {
+        if (files) free(files);
+        return strdup("config.txt");
+    }
+
+    WINDOW *win = game->main_win.window;
+    int sel = 0, c, cx = (game->main_win.cols - 20) / 2;
+
+    nodelay(stdscr, FALSE);
+    keypad(win, TRUE);
+
+    while (1) {
+        wclear(win);
+        box(win, 0, 0);
+        mvwprintw(win, 2, cx, "SELECT LEVEL:");
+
+        for (int i = 0; i < count; i++) {
+            if (i == sel) wattron(win, A_REVERSE);
+            mvwprintw(win, 4 + i, cx, "%s", files[i]);
+            if (i == sel) wattroff(win, A_REVERSE);
+        }
+        wrefresh(win);
+
+        c = wgetch(win);
+        if (c == KEY_UP) sel = (sel - 1 + count) % count;
+        else if (c == KEY_DOWN) sel = (sel + 1) % count;
+        else if (c == '\n') break;
+    }
+
+    char *res = malloc(strlen(files[sel]) + 8);
+    sprintf(res, "levels/%s", files[sel]);
+
+    for (int i = 0; i < count; i++) free(files[i]);
+    free(files);
+
+    nodelay(stdscr, TRUE);
+    keypad(win, FALSE);
+    wclear(win);
+    wrefresh(win);
+
+    return res;
 }

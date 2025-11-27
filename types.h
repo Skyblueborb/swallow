@@ -85,6 +85,7 @@ typedef struct HunterTypes {
 
 // Config types
 typedef struct {
+    int level_nr;
     int window_height;
     int window_width;
     int star_quota;

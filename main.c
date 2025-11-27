@@ -44,41 +44,48 @@ void handle_input(Game* game, entity_t* swallow) {
     }
 }
 
-void game_loop(Game* game) {
-    unsigned int sleep_us = 66666 / game->game_speed;
-    float delta_seconds = (float)sleep_us / 1000000.0f;
+static void handle_star_movement(Game* game) {
+    static int update_stars = 0;
 
-    static int hunter_spawn_counter = 0;
-    float hunter_spawn_threshold = game->config.hunter_spawn * 10;
-    static int star_spawn_counter = 0;
-    static char update_stars = 0;
-    int star_spawn_threshold = game->config.star_spawn * 10;
-    Swallow* swallow = game->entities.swallow;
-    handle_input(game, &swallow->ent);
-
-    process_swallow(game);
-
-    process_hunters(game);
-
-    collect_stars(game);
     if (update_stars == 4) {
         update_stars = -1;
         move_stars(game);
     }
     update_stars++;
+}
 
-    hunter_spawn_counter++;
-    if (hunter_spawn_counter >= hunter_spawn_threshold) {
-        hunter_spawn_counter = 0;
-        spawn_hunter(game);
-    }
+static void handle_star_spawner(Game* game) {
+    static int star_spawn_counter = 0;
+    int star_spawn_threshold = game->config.star_spawn * 10;
+
     star_spawn_counter++;
-    if (star_spawn_counter == star_spawn_threshold) {
+    if (star_spawn_counter >= star_spawn_threshold) {
         star_spawn_counter = 0;
         spawn_star(game);
     }
+}
 
-    if (swallow->hp <= 0) {
+static void handle_hunter_spawner(Game* game) {
+    static int hunter_spawn_counter = 0;
+    float base_hunter_threshold = game->config.hunter_spawn * 10;
+
+    float elapsed = game->config.timer - game->time_left;
+    float reduction_factor = 1.0f - ((elapsed / 5.0f) * 0.05f);
+
+    if (reduction_factor < 0.2f) reduction_factor = 0.2f;
+
+    float current_hunter_threshold = base_hunter_threshold * reduction_factor;
+    if (current_hunter_threshold < 5) current_hunter_threshold = 5;
+
+    hunter_spawn_counter++;
+    if (hunter_spawn_counter >= current_hunter_threshold) {
+        hunter_spawn_counter = 0;
+        spawn_hunter(game);
+    }
+}
+
+static void check_game_over(Game* game) {
+    if (game->entities.swallow->hp <= 0) {
         game->running = 0;
     }
 
@@ -86,16 +93,31 @@ void game_loop(Game* game) {
         game->running = 0;
     }
 
-    game->time_left -= delta_seconds;
-
     if (game->time_left <= 0) {
         game->time_left = 0;
         game->running = 0;
     }
+}
+void game_loop(Game* game) {
+    unsigned int sleep_us = 66666 / game->game_speed;
+    float delta_seconds = (float)sleep_us / 1000000.0f;
+
+    Swallow* swallow = game->entities.swallow;
+    handle_input(game, &swallow->ent);
+
+    process_swallow(game);
+    process_hunters(game);
+    collect_stars(game);
+    handle_star_movement(game);
+
+    handle_hunter_spawner(game);
+    handle_star_spawner(game);
+
+    game->time_left -= delta_seconds;
+    check_game_over(game);
 
     draw_status(game);
     draw_main(game);
-
     doupdate();
 
     usleep(sleep_us);
@@ -104,19 +126,33 @@ void game_loop(Game* game) {
 int main() {
     setlocale(LC_ALL, "");
     Game game = {0};
-    game.config = read_config("config.txt");
-    game.running = 1;
-    game.game_speed = 3;
-    game.time_left = game.config.timer;
+
+    conf_t initial_conf = {0};
+    initial_conf.window_height = 32;
+    initial_conf.window_width = 80;
 
     srand(game.config.seed);
     init_curses();
 
-    setup_windows(&game.main_win, &game.status_win, &game.config);
+    setup_windows(&game.main_win, &game.status_win, &initial_conf);
 
     get_username(&game);
 
+    char *level_path = select_level(&game);
+
+    game.config = read_config(level_path);
+    free(level_path);
+
+    delwin(game.main_win.window);
+    delwin(game.status_win.window);
+
+    setup_windows(&game.main_win, &game.status_win, &game.config);
+
     init_occupancy_map(&game);
+
+    game.running = 1;
+    game.game_speed = 3;
+    game.time_left = game.config.timer;
 
     Swallow swallow;
     init_swallow(&game, &swallow);

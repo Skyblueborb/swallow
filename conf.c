@@ -50,6 +50,7 @@ static const ColorNameEntry* get_color_map(int* count) {
 
 static const ConfigMapEntry* get_global_key_map(int* count) {
     static const ConfigMapEntry map[] = {
+        {"level_nr", offsetof(conf_t, level_nr), TYPE_INT},
         {"window_height", offsetof(conf_t, window_height), TYPE_INT},
         {"window_width", offsetof(conf_t, window_width), TYPE_INT},
         {"star_quota", offsetof(conf_t, star_quota), TYPE_INT},
