@@ -49,7 +49,7 @@ void game_loop(Game* game) {
     float delta_seconds = (float)sleep_us / 1000000.0f;
 
     static int hunter_spawn_counter = 0;
-    int hunter_spawn_threshold = game->config.hunter_spawn * 10;
+    float hunter_spawn_threshold = game->config.hunter_spawn * 10;
     static int star_spawn_counter = 0;
     static char update_stars = 0;
     int star_spawn_threshold = game->config.star_spawn * 10;
@@ -68,7 +68,7 @@ void game_loop(Game* game) {
     update_stars++;
 
     hunter_spawn_counter++;
-    if (hunter_spawn_counter == hunter_spawn_threshold) {
+    if (hunter_spawn_counter >= hunter_spawn_threshold) {
         hunter_spawn_counter = 0;
         spawn_hunter(game);
     }
@@ -113,6 +113,9 @@ int main() {
     init_curses();
 
     setup_windows(&game.main_win, &game.status_win, &game.config);
+
+    get_username(&game);
+
     init_occupancy_map(&game);
 
     Swallow swallow;
@@ -127,6 +130,9 @@ int main() {
     delwin(game.main_win.window);
     delwin(game.status_win.window);
     endwin();
+    if (game.username) {
+        free(game.username);
+    }
     free_config(&game.config);
     free_occupancy_map(&game);
     free_hunters(&game);

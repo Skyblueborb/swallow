@@ -4,8 +4,52 @@
 #include <stdlib.h>
 #include <string.h>
 #include "types.h"
+#include "utils.h"
 
-static const ConfigMapEntry global_key_map[] = {
+static const ColorNameEntry* get_color_map(int* count) {
+    static const ColorNameEntry map[] = {
+        {"default",     PAIR_DEFAULT},
+        {"player",      PAIR_PLAYER},
+        {"star",        PAIR_STAR},
+        {"red_1",       C_RED_1},
+        {"red_2",       C_RED_2},
+        {"red_3",       C_RED_3},
+        {"red_4",       C_RED_4},
+        {"red_5",       C_RED_5},
+        {"green_1",     C_GREEN_1},
+        {"green_2",     C_GREEN_2},
+        {"green_3",     C_GREEN_3},
+        {"green_4",     C_GREEN_4},
+        {"green_5",     C_GREEN_5},
+        {"blue_1",      C_BLUE_1},
+        {"blue_2",      C_BLUE_2},
+        {"blue_3",      C_BLUE_3},
+        {"blue_4",      C_BLUE_4},
+        {"blue_5",      C_BLUE_5},
+        {"yellow_1",    C_YELLOW_1},
+        {"yellow_2",    C_YELLOW_2},
+        {"yellow_3",    C_YELLOW_3},
+        {"yellow_4",    C_YELLOW_4},
+        {"yellow_5",    C_YELLOW_5},
+        {"purple_1",    C_PURPLE_1},
+        {"purple_2",    C_PURPLE_2},
+        {"purple_3",    C_PURPLE_3},
+        {"purple_4",    C_PURPLE_4},
+        {"purple_5",    C_PURPLE_5},
+        {"cyan_1",      C_CYAN_1},
+        {"cyan_2",      C_CYAN_2},
+        {"cyan_3",      C_CYAN_3},
+        {"cyan_4",      C_CYAN_4},
+        {"cyan_5",      C_CYAN_5},
+        {"grey_1",      C_GREY_1},
+        {"grey_2",      C_GREY_2},
+    };
+    *count = sizeof(map) / sizeof(map[0]);
+    return map;
+}
+
+static const ConfigMapEntry* get_global_key_map(int* count) {
+    static const ConfigMapEntry map[] = {
         {"window_height", offsetof(conf_t, window_height), TYPE_INT},
         {"window_width", offsetof(conf_t, window_width), TYPE_INT},
         {"star_quota", offsetof(conf_t, star_quota), TYPE_INT},
@@ -15,24 +59,22 @@ static const ConfigMapEntry global_key_map[] = {
         {"min_speed", offsetof(conf_t, min_speed), TYPE_INT},
         {"max_speed", offsetof(conf_t, max_speed), TYPE_INT},
         {"seed", offsetof(conf_t, seed), TYPE_INT},
-};
+    };
+    *count = sizeof(map) / sizeof(map[0]);
+    return map;
+}
 
-static const ConfigMapEntry hunter_key_map[] = {
+static const ConfigMapEntry* get_hunter_key_map(int* count) {
+    static const ConfigMapEntry map[] = {
         {"width", offsetof(HunterTypes, width), TYPE_INT},
         {"height", offsetof(HunterTypes, height), TYPE_INT},
         {"bounces", offsetof(HunterTypes, bounces), TYPE_INT},
         {"speed", offsetof(HunterTypes, speed), TYPE_INT},
         {"damage", offsetof(HunterTypes, damage), TYPE_INT},
-};
-
-static const int num_global_keys = sizeof(global_key_map) / sizeof(global_key_map[0]);
-static const int num_hunter_keys = sizeof(hunter_key_map) / sizeof(hunter_key_map[0]);
-
-static void strip_newline(char* str) {
-    size_t len = strlen(str);
-    if (len > 0 && str[len - 1] == '\n') {
-        str[len - 1] = '\0';
-    }
+        {"color",   offsetof(HunterTypes, color), TYPE_COLOR},
+    };
+    *count = sizeof(map) / sizeof(map[0]);
+    return map;
 }
 
 static void parse_sprite(conf_t* config, int hunter_idx, const char* key, const char* value) {
@@ -60,6 +102,18 @@ static void parse_sprite(conf_t* config, int hunter_idx, const char* key, const 
     }
 }
 
+static int parse_color_name(const char* value) {
+    int count;
+    const ColorNameEntry* map = get_color_map(&count);
+
+    for (int i = 0; i < count; i++) {
+        if (strcmp(value, map[i].name) == 0) {
+            return (int)map[i].value;
+        }
+    }
+    return (int)PAIR_DEFAULT;
+}
+
 static void parse_values(conf_t* config, int hunter_idx, const char* key, const char* value) {
     void* base_ptr;
     const ConfigMapEntry* map;
@@ -67,16 +121,14 @@ static void parse_values(conf_t* config, int hunter_idx, const char* key, const 
 
     if (hunter_idx < 0) {
         base_ptr = config;
-        map = global_key_map;
-        count = num_global_keys;
+        map = get_global_key_map(&count);
     } else {
         if (strncmp(key, "sprite", 6) == 0) {
             parse_sprite(config, hunter_idx, key, value);
             return;
         }
         base_ptr = &config->hunter_templates[hunter_idx];
-        map = hunter_key_map;
-        count = num_hunter_keys;
+        map = get_hunter_key_map(&count);
     }
 
     for (int i = 0; i < count; i++) {
@@ -87,6 +139,8 @@ static void parse_values(conf_t* config, int hunter_idx, const char* key, const 
                 *(int*)target = atoi(value);
             } else if (map[i].type == TYPE_FLOAT) {
                 *(float*)target = atof(value);
+            } else if (map[i].type == TYPE_COLOR) {
+                *(int*)target = parse_color_name(value);
             }
         }
     }

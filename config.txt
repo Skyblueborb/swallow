@@ -14,7 +14,8 @@ hunter_template {
     height  2
     bounces 3
     speed   1
-    damage 100
+    damage 20
+    color red_3
     sprite_up    ^#
     sprite_down  v#
     sprite_left  #<
@@ -26,7 +27,8 @@ hunter_template {
     height  1
     bounces 10
     speed   10
-    damage 5
+    damage 20
+    color green_5
     sprite_up    -^
     sprite_down  -v
     sprite_left  <-
@@ -39,6 +41,7 @@ hunter_template {
     bounces 4
     speed   1
     damage 5
+    color purple_4
     sprite_up    ^||
     sprite_down  ||v
     sprite_left  <||
@@ -51,6 +54,7 @@ hunter_template {
     bounces 5
     speed   1
     damage 5
+    color yellow_3
     sprite_up    <^>
     sprite_down  -v-
     sprite_left  (<-
@@ -62,7 +66,8 @@ hunter_template {
     height  2
     bounces 5
     speed   1
-    damage 10
+    damage 20
+    color cyan_4
     sprite_up    ^^()
     sprite_down  vv()
     sprite_left  o<~~

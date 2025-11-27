@@ -1,21 +1,118 @@
+#include <string.h>
 #include "utils.h"
 #include "types.h"
+
+void strip_newline(char* str) {
+    size_t len = strlen(str);
+    if (len > 0 && str[len - 1] == '\n') {
+        str[len - 1] = '\0';
+    }
+}
+
+void init_game_colors() {
+    init_pair(C_RED_1, 52, -1);
+    init_pair(C_RED_2, 88, -1);
+    init_pair(C_RED_3, 124, -1);
+    init_pair(C_RED_4, 160, -1);
+    init_pair(C_RED_5, 196, -1);
+
+    init_pair(C_GREEN_1, 22, -1);
+    init_pair(C_GREEN_2, 28, -1);
+    init_pair(C_GREEN_3, 34, -1);
+    init_pair(C_GREEN_4, 40, -1);
+    init_pair(C_GREEN_5, 46, -1);
+
+    init_pair(C_BLUE_1, 17, -1);
+    init_pair(C_BLUE_2, 21, -1);
+    init_pair(C_BLUE_3, 27, -1);
+    init_pair(C_BLUE_4, 33, -1);
+    init_pair(C_BLUE_5, 51, -1);
+
+    init_pair(C_YELLOW_1, 94, -1);
+    init_pair(C_YELLOW_2, 130, -1);
+    init_pair(C_YELLOW_3, 172, -1);
+    init_pair(C_YELLOW_4, 214, -1);
+    init_pair(C_YELLOW_5, 226, -1);
+
+    init_pair(C_PURPLE_1, 53, -1);
+    init_pair(C_PURPLE_2, 90, -1);
+    init_pair(C_PURPLE_3, 127, -1);
+    init_pair(C_PURPLE_4, 163, -1);
+    init_pair(C_PURPLE_5, 201, -1);
+
+    init_pair(C_CYAN_1, 23, -1);
+    init_pair(C_CYAN_2, 30, -1);
+    init_pair(C_CYAN_3, 37, -1);
+    init_pair(C_CYAN_4, 44, -1);
+    init_pair(C_CYAN_5, 51, -1);
+
+    init_pair(C_GREY_1, 240, -1);
+    init_pair(C_GREY_2, 250, -1);
+
+    init_pair(PAIR_PLAYER, 51, -1);
+
+    init_pair(PAIR_STAR, 220, -1);
+
+    init_pair(PAIR_DEFAULT, 255, -1);
+}
 
 void init_curses() {
     if (initscr() == NULL) {
         fprintf(stderr, "Failed to initialize ncurses\n");
         exit(1);
     }
-    if (!has_colors()) {
+    if (!has_colors() && COLORS < 256) {
         endwin();
         printf("Your terminal does not support color\n");
         exit(1);
     }
     start_color();
+    use_default_colors();
+    init_game_colors();
     noecho();
     curs_set(0);
     nodelay(stdscr, TRUE);
     refresh();
+}
+
+void get_username(Game *game) {
+    char buffer[50] = {0};
+    WINDOW *win = game->main_win.window;
+    int rows = game->main_win.rows;
+    int cols = game->main_win.cols;
+
+    int center_y = rows / 2;
+    int center_x = (cols - 16) / 2;
+
+    mvwprintw(win, center_y, center_x, "Enter Username: ");
+    wmove(win, center_y + 1, center_x);
+    wrefresh(win);
+
+    nodelay(stdscr, FALSE);
+    echo();
+    curs_set(1);
+
+    wgetnstr(win, buffer, 49);
+
+    noecho();
+    curs_set(0);
+    nodelay(stdscr, TRUE);
+
+    strip_newline(buffer);
+
+    if (strlen(buffer) == 0) {
+        strcpy(buffer, "Player");
+    }
+
+    game->username = malloc(strlen(buffer) + 1);
+    if (game->username) {
+        strcpy(game->username, buffer);
+    } else {
+        exit(1);
+    }
+
+    wclear(win);
+    wrefresh(win);
 }
 
 void setup_windows(WIN* main_win, WIN* status_win, const conf_t* config) {
@@ -103,6 +200,7 @@ void init_swallow(Game* game, Swallow* swallow) {
     s->y = game->main_win.rows / 2;
     s->speed = 1;
     s->direction = DIR_RIGHT;
+    s->color = C_GREEN_5;
     s->sprites[DIR_UP] =
             ".^."
             "/o\\"

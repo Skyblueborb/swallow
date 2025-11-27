@@ -1,3 +1,5 @@
+#include <stddef.h>
+
 #include "entity.h"
 #include "graphics.h"
 #include "physics.h"
@@ -45,6 +47,7 @@ static Hunter* init_hunter_data(Game* game, int template_idx) {
     hun->ent.width = t->width;
     hun->ent.height = t->height;
     hun->ent.speed = t->speed;
+    hun->ent.color = t->color;
     hun->bounces = t->bounces;
     hun->damage = t->damage;
     hun->next = NULL;
@@ -102,6 +105,7 @@ void spawn_star(Game* game) {
 
     star->ent.x = 2 + (rand() % max_c);
     star->ent.y = 1;
+    star->ent.color = PAIR_STAR;
 
     change_entity_direction(&star->ent, DIR_DOWN, star->ent.speed);
 
@@ -124,36 +128,34 @@ void remove_entity(Game* game, entity_t* ent) {
     update_occupancy_map(game->occupancy_map, game->main_win.rows, game->main_win.cols, ent, ' ');
 }
 
-Hunter* remove_hunter(Game* game, Hunter* current, Hunter* prev) {
-    remove_entity(game, &current->ent);
+static void* remove_generic_node(Game* game, void** head_ref, void* current, void* prev,
+                                 size_t next_offset, size_t ent_offset) {
+    entity_t* ent = (entity_t*)((char*)current + ent_offset);
+    remove_entity(game, ent);
 
-    Hunter* to_free = current;
-    Hunter* next_node = current->next;
+    void** current_next_ptr = (void**)((char*)current + next_offset);
+    void* next_node = *current_next_ptr;
 
     if (prev == NULL) {
-        game->entities.hunters = next_node;
+        *head_ref = next_node;
     } else {
-        prev->next = next_node;
+        void** prev_next_ptr = (void**)((char*)prev + next_offset);
+        *prev_next_ptr = next_node;
     }
 
-    free(to_free);
+    free(current);
+
     return next_node;
 }
 
+Hunter* remove_hunter(Game* game, Hunter* current, Hunter* prev) {
+    return (Hunter*)remove_generic_node(game, (void**)&game->entities.hunters, current, prev,
+                                        offsetof(Hunter, next), offsetof(Hunter, ent));
+}
+
 Star* remove_star(Game* game, Star* current, Star* prev) {
-    remove_entity(game, &current->ent);
-
-    Star* to_free = current;
-    Star* next_node = current->next;
-
-    if (prev == NULL) {
-        game->entities.stars = next_node;
-    } else {
-        prev->next = next_node;
-    }
-
-    free(to_free);
-    return next_node;
+    return (Star*)remove_generic_node(game, (void**)&game->entities.stars, current, prev,
+                                      offsetof(Star, next), offsetof(Star, ent));
 }
 
 void collect_stars(Game* game) {
@@ -217,8 +219,6 @@ static int resolve_hunter_collision(Game* game, Hunter** curr, Hunter* prev, col
             *curr = remove_hunter(game, h, prev);
             return 1;
         }
-
-        h->bounces--;
     }
 
     if (h->bounces <= 0) {
@@ -271,6 +271,24 @@ static void handle_swallow_hunter(Game* game, Swallow* s) {
     }
 }
 
+static void update_swallow_color(Swallow *s) {
+    if (s->hp >= 80) {
+        s->ent.color = C_GREEN_5;
+    }
+    else if (s->hp >= 60) {
+        s->ent.color = C_CYAN_3;
+    }
+    else if (s->hp >= 40) {
+        s->ent.color = C_PURPLE_5;
+    }
+    else if (s->hp >= 20) {
+        s->ent.color = C_RED_3;
+    }
+    else {
+        s->ent.color = C_RED_5;
+    }
+}
+
 void process_swallow(Game* game) {
     Swallow* s = game->entities.swallow;
     collision_t ret = process_entity_tick(game, &s->ent, SWALLOW);
@@ -280,4 +298,5 @@ void process_swallow(Game* game) {
     } else if (ret == HUNTER) {
         handle_swallow_hunter(game, s);
     }
+    update_swallow_color(s);
 }
