@@ -1,4 +1,5 @@
-#include "string.h"
+#include <ncurses.h>
+#include <string.h>
 #include "types.h"
 
 void draw_sprite(Game* game, entity_t* entity) {
@@ -59,7 +60,7 @@ void draw_status(Game* game) {
     mvwprintw(win, 3, 2, "Game speed: %-3d", game->game_speed);
     mvwprintw(win, 4, 2, "Taxi cooldown: %-3d",
               game->albatross_cooldown > 0 ? game->albatross_cooldown : 0);
-    mvwprintw(win, 5, 2, "Score: %d", (int)game->score);
+    mvwprintw(win, 5, 2, "Score: %-10d", (int)game->score);
     wattroff(win, A_BOLD);
     wnoutrefresh(win);
 }

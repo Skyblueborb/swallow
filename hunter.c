@@ -1,6 +1,8 @@
 #include <stddef.h>
+#include <stdlib.h>
 
 #include "entity.h"
+#include "graphics.h"
 #include "physics.h"
 #include "types.h"
 
@@ -37,8 +39,6 @@ static void get_spawn_coordinates(Game* game, entity_t* hunter_ent, direction_t 
 
     hunter_ent->x = x;
     hunter_ent->y = y;
-
-    aim_at_target(hunter_ent, &game->entities.swallow->ent);
 }
 
 static void setup_hunter_physics(Hunter* hun, int x, int y, direction_t dir) {
@@ -136,7 +136,7 @@ static int resolve_hunter_collision(Game* game, Hunter** curr, Hunter* prev, col
 
         if (ret == HUNTER || ret == SWALLOW) {
             if (ret == SWALLOW) {
-                game->entities.swallow->hp -= 5;
+                game->entities.swallow->hp -= h->damage;
             }
             *curr = remove_hunter(game, h, prev);
             return 1;
@@ -167,7 +167,7 @@ static int handle_hunter_logic(Hunter* h, Swallow* s) {
             if (h->state_timer <= 0) {
                 h->state = HUNTER_DASHING;
                 h->ent.speed = (h->base_speed * 2);
-                if (h->ent.speed > 3) h->ent.speed = 3;
+                if (h->ent.speed > 3) h->ent.speed = 2;
 
                 aim_at_target(&h->ent, &s->ent);
 
@@ -187,6 +187,8 @@ void process_hunters(Game* game) {
 
     while (current != NULL) {
         if (handle_hunter_logic(current, game->entities.swallow)) {
+            draw_sprite(game, &current->ent);
+
             prev = current;
             current = current->next;
             continue;

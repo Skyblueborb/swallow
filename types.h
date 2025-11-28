@@ -5,6 +5,8 @@
 #include <stdlib.h>
 #include <inttypes.h>
 
+#define MAX_SAFE_ZONE_ATTEMPTS 50
+
 typedef struct {
     WINDOW* window;
     int x, y, rows, cols;
@@ -108,7 +110,8 @@ typedef struct {
     int min_speed;
     int max_speed;
     int seed;
-    HunterTypes hunter_templates[5];
+    int hunter_templates_amount;
+    HunterTypes *hunter_templates;
 } conf_t;
 
 typedef enum {
@@ -147,6 +150,10 @@ typedef struct {
     int game_speed;
     int stars_collected;
     int albatross_cooldown;
+    int hunter_spawn_tick;
+    int star_spawn_tick;
+    int star_move_tick;
+    int star_flicker_tick;
     float score;
     GameEntities entities;
 } Game;

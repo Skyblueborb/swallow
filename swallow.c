@@ -65,18 +65,17 @@ static int is_zone_safe(Game* game, int x, int y, int w, int h) {
     int check_w = w + (pad * 2);
     int check_h = h + (pad * 2);
 
-    if (check_x < 2 || check_y < 2 ||
-        check_x + check_w >= game->main_win.cols - 2 ||
+    if (check_x < 2 || check_y < 2 || check_x + check_w >= game->main_win.cols - 2 ||
         check_y + check_h >= game->main_win.rows - 2) {
         return 0;
     }
 
-    return check_occupancy_map(game->occupancy_map, game->main_win.rows,
-                               game->main_win.cols, check_x, check_y, check_w, check_h) == EMPTY;
+    return check_occupancy_map(game->occupancy_map, game->main_win.rows, game->main_win.cols,
+                               check_x, check_y, check_w, check_h) == EMPTY;
 }
 
 static void find_safe_zone(Game* game, int* safe_x, int* safe_y, int w, int h) {
-    for (int i = 0; i < 50; i++) {
+    for (int i = 0; i < MAX_SAFE_ZONE_ATTEMPTS; i++) {
         int tx = 2 + (rand() % (game->main_win.cols - 10));
         int ty = 2 + (rand() % (game->main_win.rows - 10));
         if (is_zone_safe(game, tx, ty, w, h)) {
@@ -95,7 +94,10 @@ static void init_taxi_sprite(entity_t* taxi, int x, int y) {
     taxi->height = 3;
     taxi->direction = DIR_UP;
     taxi->color = C_PURPLE_5;
-    taxi->sprites[DIR_UP] = "#^#""#o#""###";
+    taxi->sprites[DIR_UP] =
+            "#^#"
+            "#o#"
+            "###";
 }
 
 static void draw_static_scene(Game* game) {
@@ -154,7 +156,8 @@ void call_albatross_taxi(Game* game) {
 
     s->ent.x = safe_x;
     s->ent.y = safe_y;
-    update_occupancy_map(game->occupancy_map, game->main_win.rows, game->main_win.cols, &s->ent, SWALLOW);
+    update_occupancy_map(game->occupancy_map, game->main_win.rows, game->main_win.cols, &s->ent,
+                         SWALLOW);
 
     game->albatross_cooldown = 300;
 }

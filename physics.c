@@ -1,6 +1,6 @@
+#include <stddef.h>
 #include "types.h"
 
-// We assume the fields are empty where we update
 void update_occupancy_map(char** occupancy_map, int rows, int cols, entity_t* ent,
                           char map_representation) {
     int x = ent->x;
@@ -22,7 +22,7 @@ void update_occupancy_map(char** occupancy_map, int rows, int cols, entity_t* en
 collision_t check_occupancy_map(char** occupancy_map, int rows, int cols, int x, int y, int width,
                                 int height) {
     if (x <= 0 || y <= 0 || x + width >= cols || y + height >= rows) {
-        return WALL;  // Collision with Border Walls
+        return WALL;
     }
     for (int i = y; i < y + height; i++) {
         for (int j = x; j < x + width; j++) {
@@ -97,57 +97,48 @@ int attempt_move_entity(Game* game, entity_t* ent) {
     return ret;
 }
 
-Hunter* find_hunter_collision(Game* game, Hunter** prev_out, int area_x, int area_y, int area_w,
-                              int area_h) {
-    Hunter* h = game->entities.hunters;
-    Hunter* last = NULL;
+static void* find_generic_collision(void* head, void** prev_out, size_t next_offset,
+                                    size_t ent_offset, int area_x, int area_y, int area_w,
+                                    int area_h) {
+    void* current = head;
+    void* last = NULL;
 
-    while (h != NULL) {
-        int h_left = h->ent.x;
-        int h_right = h->ent.x + h->ent.width;
-        int h_top = h->ent.y;
-        int h_bottom = h->ent.y + h->ent.height;
+    while (current != NULL) {
+        entity_t* ent = (entity_t*)((char*)current + ent_offset);
 
-        int t_left = area_x;
-        int t_right = area_x + area_w;
-        int t_top = area_y;
-        int t_bottom = area_y + area_h;
+        int ent_left = ent->x;
+        int ent_right = ent->x + ent->width;
+        int ent_top = ent->y;
+        int ent_bottom = ent->y + ent->height;
 
-        if (h_left < t_right && h_right > t_left && h_top < t_bottom && h_bottom > t_top) {
+        int area_right = area_x + area_w;
+        int area_bottom = area_y + area_h;
+
+        if (ent_left < area_right && ent_right > area_x && ent_top < area_bottom &&
+            ent_bottom > area_y) {
             if (prev_out) *prev_out = last;
-            return h;
+            return current;
         }
 
-        last = h;
-        h = h->next;
+        last = current;
+        void** next_ptr = (void**)((char*)current + next_offset);
+        current = *next_ptr;
     }
     return NULL;
 }
 
+Hunter* find_hunter_collision(Game* game, Hunter** prev_out, int area_x, int area_y, int area_w,
+                              int area_h) {
+    return (Hunter*)find_generic_collision(game->entities.hunters, (void**)prev_out,
+                                           offsetof(Hunter, next), offsetof(Hunter, ent), area_x,
+                                           area_y, area_w, area_h);
+}
+
 Star* find_star_collision(Game* game, Star** prev_out, int area_x, int area_y, int area_w,
                           int area_h) {
-    Star* s = game->entities.stars;
-    Star* last = NULL;
-
-    while (s != NULL) {
-        int s_left = s->ent.x;
-        int s_right = s->ent.x + s->ent.width;
-        int s_top = s->ent.y;
-        int s_bottom = s->ent.y + s->ent.height;
-
-        int t_left = area_x;
-        int t_right = area_x + area_w;
-        int t_top = area_y;
-        int t_bottom = area_y + area_h;
-
-        if (s_left < t_right && s_right > t_left && s_top < t_bottom && s_bottom > t_top) {
-            if (prev_out) *prev_out = last;
-            return s;
-        }
-        last = s;
-        s = s->next;
-    }
-    return NULL;
+    return (Star*)find_generic_collision(game->entities.stars, (void**)prev_out,
+                                         offsetof(Star, next), offsetof(Star, ent), area_x, area_y,
+                                         area_w, area_h);
 }
 
 int is_touching(entity_t* s, entity_t* t) {

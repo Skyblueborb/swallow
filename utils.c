@@ -86,6 +86,7 @@ void get_username(Game* game) {
     int center_y = rows / 2;
     int center_x = (cols - 16) / 2;
 
+    box(win, 0, 0);
     mvwprintw(win, center_y, center_x, "Enter Username: ");
     wmove(win, center_y + 1, center_x);
     wrefresh(win);
@@ -202,6 +203,8 @@ void init_swallow(Game* game, Swallow* swallow) {
     s->y = game->main_win.rows / 2;
     s->speed = 1;
     s->direction = DIR_RIGHT;
+    s->dx = s->speed;
+    s->dy = 0;
     s->color = C_GREEN_5;
     s->sprites[DIR_UP] =
             ".^."

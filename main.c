@@ -1,6 +1,7 @@
 #include <ctype.h>
 #include <curses.h>
 #include <locale.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -27,6 +28,7 @@ void handle_input(Game* game, entity_t* swallow) {
         switch (ch) {
             case 'q':
                 game->running = 0;
+                game->score = 0.f;
                 break;
             case 'w':
                 change_entity_direction(swallow, DIR_UP, swallow->speed);
@@ -54,28 +56,24 @@ void handle_input(Game* game, entity_t* swallow) {
 }
 
 static void handle_star_movement(Game* game) {
-    static int update_stars = 0;
-
-    if (update_stars == 4) {
-        update_stars = -1;
+    if (game->star_move_tick == 4) {
+        game->star_move_tick = -1;
         move_stars(game);
     }
-    update_stars++;
+    game->star_move_tick++;
 }
 
 static void handle_star_spawner(Game* game) {
-    static int star_spawn_counter = 0;
     int star_spawn_threshold = game->config.star_spawn * 10;
 
-    star_spawn_counter++;
-    if (star_spawn_counter >= star_spawn_threshold) {
-        star_spawn_counter = 0;
+    game->star_spawn_tick++;
+    if (game->star_spawn_tick >= star_spawn_threshold) {
+        game->star_spawn_tick = 0;
         spawn_star(game);
     }
 }
 
 static void handle_hunter_spawner(Game* game) {
-    static int hunter_spawn_counter = 0;
     float base_hunter_threshold = game->config.hunter_spawn * 10;
 
     float elapsed = game->config.timer - game->time_left;
@@ -86,9 +84,9 @@ static void handle_hunter_spawner(Game* game) {
     float current_hunter_threshold = base_hunter_threshold * reduction_factor;
     if (current_hunter_threshold < 5) current_hunter_threshold = 5;
 
-    hunter_spawn_counter++;
-    if (hunter_spawn_counter >= current_hunter_threshold) {
-        hunter_spawn_counter = 0;
+    game->hunter_spawn_tick++;
+    if (game->hunter_spawn_tick >= current_hunter_threshold) {
+        game->hunter_spawn_tick = 0;
         spawn_hunter(game);
     }
 }
@@ -96,21 +94,44 @@ static void handle_hunter_spawner(Game* game) {
 static void check_game_over(Game* game) {
     if (game->entities.swallow->hp <= 0) {
         game->running = 0;
+        game->score = 0;
     }
 
     if (game->stars_collected >= game->config.star_quota) {
         game->running = 0;
-        game->score += game->time_left * game->config.score_time_weight +
-                       game->entities.swallow->hp * game->config.score_life_weight;
-        game->score *= game->config.level_nr;
+
+        float score = 0;
+        score += game->stars_collected * game->config.score_stars_weight;
+        score += game->time_left * game->config.score_time_weight;
+        score += game->entities.swallow->hp * game->config.score_life_weight;
+
+        game->score = score * game->config.level_nr;
     }
 
     if (game->time_left <= 0) {
         game->time_left = 0;
         game->running = 0;
+        game->score = 0;
     }
 }
+
+static void reset_game_state(Game* game) {
+    game->hunter_spawn_tick = 0;
+    game->star_spawn_tick = 0;
+    game->star_move_tick = 0;
+    game->star_flicker_tick = 0;
+    game->stars_collected = 0;
+    game->albatross_cooldown = 0;
+    srand(game->config.seed);
+
+    if (game->entities.hunters != NULL) free_hunters(game);
+    if (game->entities.stars != NULL) free_stars(game);
+}
+
 void game_loop(Game* game) {
+    if (fabs(game->time_left - game->config.timer) < 0.001) {
+        reset_game_state(game);
+    }
     unsigned int sleep_us = 66666 / game->game_speed;
     float delta_seconds = (float)sleep_us / 1000000.0f;
 
@@ -140,7 +161,6 @@ void game_loop(Game* game) {
 
 int main() {
     setlocale(LC_ALL, "");
-    srand(time(NULL));
     Game game = {0};
 
     init_curses();
@@ -161,16 +181,17 @@ int main() {
         menu_loop(&game, choice);
     }
 
+    if (game.entities.hunters) free_hunters(&game);
+    if (game.entities.stars) free_stars(&game);
+    if (game.entities.swallow) free(game.entities.swallow);
+
     delwin(game.main_win.window);
     delwin(game.status_win.window);
     endwin();
 
     if (game.username) free(game.username);
-    if (game.entities.swallow) free(game.entities.swallow);
     free_config(&game.config);
     free_occupancy_map(&game);
-    if (game.entities.hunters != NULL) free_hunters(&game);
-    if (game.entities.stars != NULL) free_stars(&game);
 
     return 0;
 }

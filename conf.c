@@ -1,4 +1,5 @@
 #include "conf.h"
+#include <ctype.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -40,6 +41,7 @@ static const ConfigMapEntry* get_global_key_map(int* count) {
             {"score_time_weight", offsetof(conf_t, score_time_weight), TYPE_FLOAT},
             {"score_stars_weight", offsetof(conf_t, score_stars_weight), TYPE_FLOAT},
             {"score_life_weight", offsetof(conf_t, score_life_weight), TYPE_FLOAT},
+            {"hunter_templates_amount", offsetof(conf_t, hunter_templates_amount), TYPE_INT},
     };
     *count = sizeof(map) / sizeof(map[0]);
     return map;
@@ -67,19 +69,25 @@ static void parse_sprite(conf_t* config, int hunter_idx, const char* key, const 
         }
     }
 
+    int dir = -1;
     switch (key[7]) {
         case 'u':
-            strncpy(hunter->sprites[DIR_UP], value, size);
+            dir = DIR_UP;
             break;
         case 'd':
-            strncpy(hunter->sprites[DIR_DOWN], value, size);
+            dir = DIR_DOWN;
             break;
         case 'l':
-            strncpy(hunter->sprites[DIR_LEFT], value, size);
+            dir = DIR_LEFT;
             break;
         case 'r':
-            strncpy(hunter->sprites[DIR_RIGHT], value, size);
+            dir = DIR_RIGHT;
             break;
+    }
+
+    if (dir != -1 && hunter->sprites[dir] != NULL) {
+        strncpy(hunter->sprites[dir], value, size - 1);
+        hunter->sprites[dir][size - 1] = '\0';
     }
 }
 
@@ -127,15 +135,24 @@ static void parse_values(conf_t* config, int hunter_idx, const char* key, const 
     }
 }
 
-static void process_config_line(const char* line, conf_t* config, int* hunter_idx) {
-    char key[100] = {0}, value[100] = {0};
-    int items = sscanf(line, "%99s %99s", key, value);
+static void process_config_line(char* line, conf_t* config, int* hunter_idx) {
+    char* key = strtok(line, " \t");
+    if (!key || key[0] == '#' || key[0] == '\0') return;
 
-    if (items <= 0) return;
+    char* value = strtok(NULL, "");
+    if (value) {
+        while (*value && isspace((unsigned char)*value)) value++;
+    } else {
+        value = "";
+    }
+
+    if (strcmp(key, "hunter_templates_amount") == 0) {
+        if (config->hunter_templates == NULL)
+            config->hunter_templates = malloc(atoi(value) * sizeof(HunterTypes));
+    }
 
     if (strcmp(key, "hunter_template") == 0) {
-        (*hunter_idx)++;
-        if (*hunter_idx >= 5) *hunter_idx = 4;
+        if (*hunter_idx < config->hunter_templates_amount) (*hunter_idx)++;
     } else {
         parse_values(config, *hunter_idx, key, value);
     }
@@ -154,7 +171,6 @@ conf_t read_config(char* filename) {
 
     while (fgets(line, sizeof(line), file)) {
         strip_newline(line);
-        if (line[0] == '#' || line[0] == '\0') continue;
 
         process_config_line(line, &config, &hunter_index);
     }
@@ -170,4 +186,5 @@ void free_config(conf_t* config) {
             }
         }
     }
+    free(config->hunter_templates);
 }

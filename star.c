@@ -4,6 +4,11 @@
 #include "physics.h"
 #include "types.h"
 
+static void handle_collection(Game* game) {
+    game->stars_collected++;
+    game->score += game->config.score_stars_weight;
+}
+
 Star* remove_star(Game* game, Star* current, Star* prev) {
     return (Star*)remove_generic_node(game, (void**)&game->entities.stars, current, prev,
                                       offsetof(Star, next), offsetof(Star, ent));
@@ -16,8 +21,7 @@ void collect_stars(Game* game) {
 
     while (current != NULL) {
         if (is_touching(&current->ent, &swallow->ent)) {
-            game->stars_collected++;
-            game->score += game->config.score_stars_weight;
+            handle_collection(game);
             current = remove_star(game, current, prev);
         } else {
             prev = current;
@@ -27,11 +31,20 @@ void collect_stars(Game* game) {
 }
 
 void move_stars(Game* game) {
+    game->star_flicker_tick++;
+
+    int cycle_step = (game->star_flicker_tick / 2) % 8;
+    int color_offset = (cycle_step > 4) ? (8 - cycle_step) : cycle_step;
+
+    ColorPair flicker_color = C_YELLOW_1 + color_offset;
+
     Star* current = game->entities.stars;
     Star* prev = NULL;
     Swallow* swallow = game->entities.swallow;
 
     while (current != NULL) {
+        current->ent.color = flicker_color;
+
         int s_top = current->ent.y;
         int s_bot = current->ent.y + current->ent.height + current->ent.speed;
 
@@ -41,8 +54,7 @@ void move_stars(Game* game) {
         if (s_bot >= t_top && s_top <= t_bot &&
             current->ent.x < swallow->ent.x + swallow->ent.width &&
             current->ent.x + current->ent.width > swallow->ent.x) {
-            game->stars_collected++;
-            game->score += game->config.score_stars_weight;
+            handle_collection(game);
             current = remove_star(game, current, prev);
             continue;
         }
@@ -51,8 +63,7 @@ void move_stars(Game* game) {
 
         if (ret != EMPTY) {
             if (ret == SWALLOW) {
-                game->stars_collected++;
-                game->score += game->config.score_stars_weight;
+                handle_collection(game);
             }
             current = remove_star(game, current, prev);
         } else {

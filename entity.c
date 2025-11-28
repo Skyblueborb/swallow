@@ -1,4 +1,5 @@
 #include <stddef.h>
+#include <stdlib.h>
 #include <time.h>
 #include <unistd.h>
 
@@ -7,7 +8,9 @@
 #include "physics.h"
 #include "types.h"
 
-void aim_at_target(entity_t* source, entity_t* target) {
+#define HUNTER_LOOKAHEAD_TICKS 10
+
+void aim_at_target(entity_t* source, const entity_t* target) {
     int dx = target->x - source->x;
     int dy = target->y - source->y;
 
@@ -32,10 +35,9 @@ void aim_at_target(entity_t* source, entity_t* target) {
     }
 }
 
-int check_intercept_course(entity_t* h, entity_t* s) {
-    // Look ahead 10 ticks
-    int future_h_x = h->x + (h->dx * 10);
-    int future_h_y = h->y + (h->dy * 10);
+int check_intercept_course(const entity_t* h, const entity_t* s) {
+    int future_h_x = h->x + (h->dx * HUNTER_LOOKAHEAD_TICKS);
+    int future_h_y = h->y + (h->dy * HUNTER_LOOKAHEAD_TICKS);
 
     int current_dist = abs(s->x - h->x) + abs(s->y - h->y);
     int future_dist = abs(s->x - future_h_x) + abs(s->y - future_h_y);
@@ -60,6 +62,8 @@ void remove_entity(Game* game, entity_t* ent) {
 
 void* remove_generic_node(Game* game, void** head_ref, void* current, void* prev,
                           size_t next_offset, size_t ent_offset) {
+    if (!current) return NULL;
+
     entity_t* ent = (entity_t*)((char*)current + ent_offset);
     remove_entity(game, ent);
 

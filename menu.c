@@ -64,6 +64,45 @@ static void draw_menu_stars(Game* game, WINDOW* win) {
     wattroff(win, A_BOLD);
 }
 
+static void cleanup_menu_stars(Game* game) {
+    Star* curr = game->entities.stars;
+    while (curr) {
+        Star* next = curr->next;
+        free(curr);
+        curr = next;
+    }
+    game->entities.stars = NULL;
+}
+
+static void draw_menu_options(WINDOW* win, int selection, int num_options, const char** options,
+                              int start_y, int center_x) {
+    for (int i = 0; i < num_options; i++) {
+        if (i == selection) {
+            wattron(win, A_REVERSE | A_BOLD);
+            mvwprintw(win, start_y + (i * 2), center_x - 10, "-> %s", options[i]);
+            wattroff(win, A_REVERSE | A_BOLD);
+        } else {
+            mvwprintw(win, start_y + (i * 2), center_x - 10, "   %s", options[i]);
+        }
+    }
+}
+
+static int handle_menu_input(WINDOW* win, int* selection, int num_options) {
+    int c = wgetch(win);
+    if (c == ERR) return 0;
+
+    if (c == KEY_UP) {
+        (*selection)--;
+        if (*selection < 0) *selection = num_options - 1;
+    } else if (c == KEY_DOWN) {
+        (*selection)++;
+        if (*selection >= num_options) *selection = 0;
+    } else if (c == '\n') {
+        return 1;
+    }
+    return 0;
+}
+
 MenuOption show_start_menu(Game* game) {
     WINDOW* win = game->main_win.window;
     int selection = 0;
@@ -85,16 +124,8 @@ MenuOption show_start_menu(Game* game) {
         int art_start_y = 1;
         draw_ascii_art(game, center_x, art_start_y);
 
-        int menu_start_y = art_start_y + 6 + 4;
-        for (int i = 0; i < num_options; i++) {
-            if (i == selection) {
-                wattron(win, A_REVERSE | A_BOLD);
-                mvwprintw(win, menu_start_y + (i * 2), center_x - 10, "-> %s", options[i]);
-                wattroff(win, A_REVERSE | A_BOLD);
-            } else {
-                mvwprintw(win, menu_start_y + (i * 2), center_x - 10, "   %s", options[i]);
-            }
-        }
+        int menu_start_y = art_start_y + 10;
+        draw_menu_options(win, selection, num_options, options, menu_start_y, center_x);
 
         if (game->username) {
             mvwprintw(win, game->main_win.rows - 2, 2, "Logged in as: %s", game->username);
@@ -102,30 +133,14 @@ MenuOption show_start_menu(Game* game) {
 
         wrefresh(win);
 
-        int c = wgetch(win);
-
-        if (c != ERR) {
-            if (c == KEY_UP) {
-                selection--;
-                if (selection < 0) selection = num_options - 1;
-            } else if (c == KEY_DOWN) {
-                selection++;
-                if (selection >= num_options) selection = 0;
-            } else if (c == '\n') {
-                break;
-            }
+        if (handle_menu_input(win, &selection, num_options)) {
+            break;
         }
 
         usleep(50000);
     }
 
-    Star* curr = game->entities.stars;
-    while (curr) {
-        Star* next = curr->next;
-        free(curr);
-        curr = next;
-    }
-    game->entities.stars = NULL;
+    cleanup_menu_stars(game);
 
     nodelay(stdscr, TRUE);
     wclear(win);
@@ -134,37 +149,44 @@ MenuOption show_start_menu(Game* game) {
     return (MenuOption)selection;
 }
 
+static void start_game(Game* game) {
+    char* level_path;
+    level_path = select_level(game);
+    game->config = read_config(level_path);
+    free(level_path);
+    delwin(game->main_win.window);
+    delwin(game->status_win.window);
+    setup_windows(&game->main_win, &game->status_win, &game->config);
+    srand(game->config.seed);
+    init_occupancy_map(game);
+
+    game->running = 1;
+    game->game_speed = 3;
+    game->time_left = game->config.timer;
+    game->score = 0.f;
+
+    if (game->entities.swallow == NULL) {
+        game->entities.swallow = malloc(sizeof(Swallow));
+        if (!game->entities.swallow) exit(1);
+    }
+    init_swallow(game, game->entities.swallow);
+
+    while (game->running) {
+        game_loop(game);
+    }
+
+    if ((int)game->score > 0 && game->entities.swallow->hp > 0) {
+        save_ranking(game);
+    }
+    show_high_scores(game);
+}
+
 void menu_loop(Game* game, MenuOption choice) {
     wclear(game->status_win.window);
     wrefresh(game->status_win.window);
-    char* level_path;
     switch (choice) {
         case MENU_START_GAME:
-            level_path = select_level(game);
-            game->config = read_config(level_path);
-            free(level_path);
-            delwin(game->main_win.window);
-            delwin(game->status_win.window);
-            setup_windows(&game->main_win, &game->status_win, &game->config);
-            srand(game->config.seed);
-            init_occupancy_map(game);
-
-            game->running = 1;
-            game->game_speed = 3;
-            game->time_left = game->config.timer;
-            game->score = 0.f;
-
-            Swallow* swallow = malloc(sizeof(Swallow));
-            init_swallow(game, swallow);
-
-            game->entities.swallow = swallow;
-
-            while (game->running) {
-                game_loop(game);
-            }
-
-            save_ranking(game);
-            show_high_scores(game);
+            start_game(game);
             break;
         case MENU_HIGH_SCORES:
             nodelay(game->main_win.window, FALSE);
