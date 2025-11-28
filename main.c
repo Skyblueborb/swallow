@@ -13,8 +13,10 @@
 #include "physics.h"
 #include "types.h"
 #include "utils.h"
+
 #include "hunter.h"
 #include "swallow.h"
+#include "star.h"
 
 void handle_input(Game* game, entity_t* swallow) {
     int ch = tolower(getch());

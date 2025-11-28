@@ -43,29 +43,6 @@ int check_intercept_course(entity_t* h, entity_t* s) {
     return (future_dist < current_dist);
 }
 
-void spawn_star(Game* game) {
-    Star* star = malloc(sizeof(Star));
-    if (!star) return;
-
-    star->ent.width = 1;
-    star->ent.height = 1;
-    for (int i = 0; i < NUM_DIRECTIONS; i++) star->ent.sprites[i] = "*";
-
-    star->ent.speed = (rand() % 3) + 1;
-
-    int max_c = game->main_win.cols - star->ent.width - 2;
-    if (max_c <= 0) max_c = 1;
-
-    star->ent.x = 2 + (rand() % max_c);
-    star->ent.y = 1;
-    star->ent.color = PAIR_STAR;
-
-    change_entity_direction(&star->ent, DIR_DOWN, star->ent.speed);
-
-    star->next = game->entities.stars;
-    game->entities.stars = star;
-}
-
 collision_t process_entity_tick(Game* game, entity_t* ent, char representation) {
     remove_sprite(game, ent);
     update_occupancy_map(game->occupancy_map, game->main_win.rows, game->main_win.cols, ent, ' ');
@@ -99,61 +76,6 @@ void* remove_generic_node(Game* game, void** head_ref, void* current, void* prev
     free(current);
 
     return next_node;
-}
-
-Star* remove_star(Game* game, Star* current, Star* prev) {
-    return (Star*)remove_generic_node(game, (void**)&game->entities.stars, current, prev,
-                                      offsetof(Star, next), offsetof(Star, ent));
-}
-
-void collect_stars(Game* game) {
-    Star* current = game->entities.stars;
-    Star* prev = NULL;
-    Swallow* swallow = game->entities.swallow;
-
-    while (current != NULL) {
-        if (is_touching(&current->ent, &swallow->ent)) {
-            game->stars_collected++;
-            current = remove_star(game, current, prev);
-        } else {
-            prev = current;
-            current = current->next;
-        }
-    }
-}
-
-void move_stars(Game* game) {
-    Star* current = game->entities.stars;
-    Star* prev = NULL;
-    Swallow* swallow = game->entities.swallow;
-
-    while (current != NULL) {
-        int s_top = current->ent.y;
-        int s_bot = current->ent.y + current->ent.height + current->ent.speed;
-
-        int t_top = swallow->ent.y;
-        int t_bot = swallow->ent.y + swallow->ent.height;
-
-        if (s_bot >= t_top && s_top <= t_bot &&
-            current->ent.x < swallow->ent.x + swallow->ent.width &&
-            current->ent.x + current->ent.width > swallow->ent.x) {
-            game->stars_collected++;
-            current = remove_star(game, current, prev);
-            continue;
-        }
-
-        collision_t ret = process_entity_tick(game, &current->ent, STAR);
-
-        if (ret != EMPTY) {
-            if (ret == SWALLOW) {
-                game->stars_collected++;
-            }
-            current = remove_star(game, current, prev);
-        } else {
-            prev = current;
-            current = current->next;
-        }
-    }
 }
 
 static int is_zone_safe(Game* game, int x, int y, int w, int h) {
