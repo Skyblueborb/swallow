@@ -1,97 +1,46 @@
 #include <stddef.h>
+#include <time.h>
+#include <unistd.h>
 
 #include "entity.h"
 #include "graphics.h"
 #include "physics.h"
 #include "types.h"
 
-static void get_spawn_coordinates(Game* game, int w, int h, direction_t dir, int* x, int* y) {
-    int max_r = game->main_win.rows - h - 2;
-    int max_c = game->main_win.cols - w - 2;
+void aim_at_target(entity_t* source, entity_t* target) {
+    int dx = target->x - source->x;
+    int dy = target->y - source->y;
 
-    if (max_r <= 0) max_r = 1;
-    if (max_c <= 0) max_c = 1;
+    if (dx > 0)
+        source->dx = source->speed;
+    else if (dx < 0)
+        source->dx = -source->speed;
+    else
+        source->dx = 0;
 
-    switch (dir) {
-        case DIR_RIGHT:
-            *x = 2;
-            *y = 2 + (rand() % max_r);
-            break;
-        case DIR_LEFT:
-            *x = max_c;
-            *y = 2 + (rand() % max_r);
-            break;
-        case DIR_DOWN:
-            *x = 2 + (rand() % max_c);
-            *y = 2;
-            break;
-        case DIR_UP:
-            *x = 2 + (rand() % max_c);
-            *y = max_r;
-            break;
-        default:
-            break;
+    if (dy > 0)
+        source->dy = source->speed;
+    else if (dy < 0)
+        source->dy = -source->speed;
+    else
+        source->dy = 0;
+
+    if (abs(dx) > abs(dy)) {
+        source->direction = (dx > 0) ? DIR_RIGHT : DIR_LEFT;
+    } else {
+        source->direction = (dy > 0) ? DIR_DOWN : DIR_UP;
     }
 }
 
-static Hunter* init_hunter_data(Game* game, int template_idx) {
-    Hunter* hun = malloc(sizeof(Hunter));
-    if (!hun) return NULL;
+int check_intercept_course(entity_t* h, entity_t* s) {
+    // Look ahead 10 ticks
+    int future_h_x = h->x + (h->dx * 10);
+    int future_h_y = h->y + (h->dy * 10);
 
-    HunterTypes* t = &game->config.hunter_templates[template_idx];
+    int current_dist = abs(s->x - h->x) + abs(s->y - h->y);
+    int future_dist = abs(s->x - future_h_x) + abs(s->y - future_h_y);
 
-    for (int i = 0; i < NUM_DIRECTIONS; i++) {
-        hun->ent.sprites[i] = t->sprites[i];
-    }
-
-    hun->ent.width = t->width;
-    hun->ent.height = t->height;
-    hun->ent.speed = t->speed;
-    hun->ent.color = t->color;
-    hun->bounces = t->bounces;
-    hun->damage = t->damage;
-    hun->next = NULL;
-
-    return hun;
-}
-
-static void setup_hunter_physics(Hunter* hun, int x, int y, direction_t dir) {
-    hun->ent.x = x;
-    hun->ent.y = y;
-    change_entity_direction(&hun->ent, dir, hun->ent.speed);
-}
-
-static int is_touching(entity_t* s, entity_t* t) {
-    int tolerance = 1;
-
-    if (s->x < t->x + t->width + tolerance && s->x + s->width > t->x - tolerance &&
-        s->y < t->y + t->height + tolerance && s->y + s->height > t->y - tolerance) {
-        return 1;
-    }
-    return 0;
-}
-
-void spawn_hunter(Game* game) {
-    int t_idx = rand() % 5;
-    direction_t dir = (direction_t)(rand() % 4);
-
-    int w = game->config.hunter_templates[t_idx].width;
-    int h = game->config.hunter_templates[t_idx].height;
-
-    int x, y;
-    get_spawn_coordinates(game, w, h, dir, &x, &y);
-
-    Hunter* new_hunter = init_hunter_data(game, t_idx);
-    if (!new_hunter) return;
-
-    float elapsed = game->config.timer - game->time_left;
-    int bonus_bounces = (int)(elapsed / 10.0f);
-    new_hunter->bounces += bonus_bounces;
-
-    setup_hunter_physics(new_hunter, x, y, dir);
-
-    new_hunter->next = game->entities.hunters;
-    game->entities.hunters = new_hunter;
+    return (future_dist < current_dist);
 }
 
 void spawn_star(Game* game) {
@@ -132,7 +81,7 @@ void remove_entity(Game* game, entity_t* ent) {
     update_occupancy_map(game->occupancy_map, game->main_win.rows, game->main_win.cols, ent, ' ');
 }
 
-static void* remove_generic_node(Game* game, void** head_ref, void* current, void* prev,
+void* remove_generic_node(Game* game, void** head_ref, void* current, void* prev,
                                  size_t next_offset, size_t ent_offset) {
     entity_t* ent = (entity_t*)((char*)current + ent_offset);
     remove_entity(game, ent);
@@ -150,11 +99,6 @@ static void* remove_generic_node(Game* game, void** head_ref, void* current, voi
     free(current);
 
     return next_node;
-}
-
-Hunter* remove_hunter(Game* game, Hunter* current, Hunter* prev) {
-    return (Hunter*)remove_generic_node(game, (void**)&game->entities.hunters, current, prev,
-                                        offsetof(Hunter, next), offsetof(Hunter, ent));
 }
 
 Star* remove_star(Game* game, Star* current, Star* prev) {
@@ -212,95 +156,91 @@ void move_stars(Game* game) {
     }
 }
 
-static int resolve_hunter_collision(Game* game, Hunter** curr, Hunter* prev, collision_t ret) {
-    Hunter* h = *curr;
-    if (ret != EMPTY) {
-        change_entity_direction(&h->ent, get_opposite_direction(h->ent.direction), h->ent.speed);
-        h->bounces--;
+static int is_zone_safe(Game* game, int x, int y, int w, int h) {
+    int pad = 3;
+    int check_x = x - pad;
+    int check_y = y - pad;
+    int check_w = w + (pad * 2);
+    int check_h = h + (pad * 2);
 
-        if (ret == HUNTER || ret == SWALLOW) {
-            if (ret == SWALLOW) game->entities.swallow->hp -= h->damage;
-            *curr = remove_hunter(game, h, prev);
-            return 1;
-        }
+    if (check_x < 2 || check_y < 2 || check_x + check_w >= game->main_win.cols - 2 ||
+        check_y + check_h >= game->main_win.rows - 2) {
+        return 0;
     }
 
-    if (h->bounces <= 0) {
-        *curr = remove_hunter(game, h, prev);
-        return 1;
-    }
+    collision_t ret = check_occupancy_map(game->occupancy_map, game->main_win.rows, game->main_win.cols, check_x, check_y, check_w, check_h);
+    if (ret == EMPTY) return 1;
     return 0;
 }
 
-void process_hunters(Game* game) {
-    Hunter* current = game->entities.hunters;
-    Hunter* prev = NULL;
+void call_albatross_taxi(Game* game) {
+    if (game->albatross_cooldown > 0) return;
 
-    while (current != NULL) {
-        collision_t ret = process_entity_tick(game, &current->ent, HUNTER);
+    int safe_x = -1, safe_y = -1;
+    int w = game->entities.swallow->ent.width;
+    int h = game->entities.swallow->ent.height;
+    for (int i = 0; i < 50; i++) {
+        int tx = 2 + (rand() % (game->main_win.cols - 10));
+        int ty = 2 + (rand() % (game->main_win.rows - 10));
+        if (is_zone_safe(game, tx, ty, w, h)) {
+            safe_x = tx;
+            safe_y = ty;
+            break;
+        }
+    }
+    if (safe_x == -1) return;
 
-        if (resolve_hunter_collision(game, &current, prev, ret)) {
-            continue;
+    Swallow* s = game->entities.swallow;
+    float cur_x = s->ent.x;
+    float cur_y = s->ent.y;
+    float dx = (safe_x - cur_x) / 20.0f;
+    float dy = (safe_y - cur_y) / 20.0f;
+
+    remove_entity(game, &s->ent);
+
+    entity_t taxi = {0};
+    taxi.direction = DIR_UP;
+    taxi.sprites[DIR_UP] =
+            "#^#"
+            "#o#"
+            "###";
+    taxi.color = C_PURPLE_5;
+    taxi.width = 3;
+    taxi.height = 3;
+
+    for (int i = 0; i < 20; i++) {
+        remove_sprite(game, &taxi);
+
+        Hunter* hu = game->entities.hunters;
+        while (hu) {
+            draw_sprite(game, &hu->ent);
+            hu = hu->next;
+        }
+        Star* st = game->entities.stars;
+        while (st) {
+            draw_sprite(game, &st->ent);
+            st = st->next;
         }
 
-        prev = current;
-        current = current->next;
+
+        cur_x += dx;
+        cur_y += dy;
+        taxi.x = (int)cur_x;
+        taxi.y = (int)cur_y;
+
+        draw_sprite(game, &taxi);
+
+        draw_main(game);
+
+        wnoutrefresh(game->main_win.window);
+
+        doupdate();
+        usleep(30000);
     }
-}
+    remove_sprite(game, &taxi);
 
-static void handle_swallow_star(Game* game, Swallow* s) {
-    Star* prev = NULL;
-    int tx = s->ent.x + s->ent.dx;
-    int ty = s->ent.y + s->ent.dy;
+    s->ent.x = safe_x;
+    s->ent.y = safe_y;
 
-    Star* target = find_star_collision(game, &prev, tx, ty, s->ent.width, s->ent.height);
-
-    if (target) {
-        game->stars_collected++;
-        remove_star(game, target, prev);
-    }
-}
-
-static void handle_swallow_hunter(Game* game, Swallow* s) {
-    Hunter* prev = NULL;
-    int tx = s->ent.x + s->ent.dx;
-    int ty = s->ent.y + s->ent.dy;
-
-    Hunter* target = find_hunter_collision(game, &prev, tx, ty, s->ent.width, s->ent.height);
-
-    s->hp -= target->damage;
-
-    if (target) {
-        remove_hunter(game, target, prev);
-    }
-}
-
-static void update_swallow_color(Swallow *s) {
-    if (s->hp >= 80) {
-        s->ent.color = C_GREEN_5;
-    }
-    else if (s->hp >= 60) {
-        s->ent.color = C_CYAN_3;
-    }
-    else if (s->hp >= 40) {
-        s->ent.color = C_PURPLE_5;
-    }
-    else if (s->hp >= 20) {
-        s->ent.color = C_RED_3;
-    }
-    else {
-        s->ent.color = C_RED_5;
-    }
-}
-
-void process_swallow(Game* game) {
-    Swallow* s = game->entities.swallow;
-    collision_t ret = process_entity_tick(game, &s->ent, SWALLOW);
-
-    if (ret == STAR) {
-        handle_swallow_star(game, s);
-    } else if (ret == HUNTER) {
-        handle_swallow_hunter(game, s);
-    }
-    update_swallow_color(s);
+    game->albatross_cooldown = 300;
 }

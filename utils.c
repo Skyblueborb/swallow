@@ -1,6 +1,6 @@
-#include <string.h>
-#include <dirent.h>
 #include "utils.h"
+#include <dirent.h>
+#include <string.h>
 #include "types.h"
 
 void strip_newline(char* str) {
@@ -76,9 +76,9 @@ void init_curses() {
     refresh();
 }
 
-void get_username(Game *game) {
+void get_username(Game* game) {
     char buffer[50] = {0};
-    WINDOW *win = game->main_win.window;
+    WINDOW* win = game->main_win.window;
     int rows = game->main_win.rows;
     int cols = game->main_win.cols;
 
@@ -235,16 +235,16 @@ void free_hunters(Game* game) {
     }
 }
 
-static int load_levels(char ***files) {
-    DIR *d = opendir("levels");
+static int load_levels(char*** files) {
+    DIR* d = opendir("levels");
     int count = 0;
-    struct dirent *dir;
+    struct dirent* dir;
 
     if (!d) return 0;
 
     while ((dir = readdir(d))) {
         if (strstr(dir->d_name, ".conf")) {
-            char **tmp = realloc(*files, sizeof(char*) * (count + 1));
+            char** tmp = realloc(*files, sizeof(char*) * (count + 1));
             if (tmp) {
                 *files = tmp;
                 (*files)[count++] = strdup(dir->d_name);
@@ -255,8 +255,8 @@ static int load_levels(char ***files) {
     return count;
 }
 
-char* select_level(Game *game) {
-    char **files = NULL;
+char* select_level(Game* game) {
+    char** files = NULL;
     int count = load_levels(&files);
 
     if (count == 0) {
@@ -264,7 +264,7 @@ char* select_level(Game *game) {
         return strdup("config.txt");
     }
 
-    WINDOW *win = game->main_win.window;
+    WINDOW* win = game->main_win.window;
     int sel = 0, c, cx = (game->main_win.cols - 20) / 2;
 
     nodelay(stdscr, FALSE);
@@ -283,12 +283,15 @@ char* select_level(Game *game) {
         wrefresh(win);
 
         c = wgetch(win);
-        if (c == KEY_UP) sel = (sel - 1 + count) % count;
-        else if (c == KEY_DOWN) sel = (sel + 1) % count;
-        else if (c == '\n') break;
+        if (c == KEY_UP)
+            sel = (sel - 1 + count) % count;
+        else if (c == KEY_DOWN)
+            sel = (sel + 1) % count;
+        else if (c == '\n')
+            break;
     }
 
-    char *res = malloc(strlen(files[sel]) + 8);
+    char* res = malloc(strlen(files[sel]) + 8);
     sprintf(res, "levels/%s", files[sel]);
 
     for (int i = 0; i < count; i++) free(files[i]);

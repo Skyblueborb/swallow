@@ -8,41 +8,18 @@
 
 static const ColorNameEntry* get_color_map(int* count) {
     static const ColorNameEntry map[] = {
-        {"default",     PAIR_DEFAULT},
-        {"player",      PAIR_PLAYER},
-        {"star",        PAIR_STAR},
-        {"red_1",       C_RED_1},
-        {"red_2",       C_RED_2},
-        {"red_3",       C_RED_3},
-        {"red_4",       C_RED_4},
-        {"red_5",       C_RED_5},
-        {"green_1",     C_GREEN_1},
-        {"green_2",     C_GREEN_2},
-        {"green_3",     C_GREEN_3},
-        {"green_4",     C_GREEN_4},
-        {"green_5",     C_GREEN_5},
-        {"blue_1",      C_BLUE_1},
-        {"blue_2",      C_BLUE_2},
-        {"blue_3",      C_BLUE_3},
-        {"blue_4",      C_BLUE_4},
-        {"blue_5",      C_BLUE_5},
-        {"yellow_1",    C_YELLOW_1},
-        {"yellow_2",    C_YELLOW_2},
-        {"yellow_3",    C_YELLOW_3},
-        {"yellow_4",    C_YELLOW_4},
-        {"yellow_5",    C_YELLOW_5},
-        {"purple_1",    C_PURPLE_1},
-        {"purple_2",    C_PURPLE_2},
-        {"purple_3",    C_PURPLE_3},
-        {"purple_4",    C_PURPLE_4},
-        {"purple_5",    C_PURPLE_5},
-        {"cyan_1",      C_CYAN_1},
-        {"cyan_2",      C_CYAN_2},
-        {"cyan_3",      C_CYAN_3},
-        {"cyan_4",      C_CYAN_4},
-        {"cyan_5",      C_CYAN_5},
-        {"grey_1",      C_GREY_1},
-        {"grey_2",      C_GREY_2},
+            {"default", PAIR_DEFAULT}, {"player", PAIR_PLAYER},  {"star", PAIR_STAR},
+            {"red_1", C_RED_1},        {"red_2", C_RED_2},       {"red_3", C_RED_3},
+            {"red_4", C_RED_4},        {"red_5", C_RED_5},       {"green_1", C_GREEN_1},
+            {"green_2", C_GREEN_2},    {"green_3", C_GREEN_3},   {"green_4", C_GREEN_4},
+            {"green_5", C_GREEN_5},    {"blue_1", C_BLUE_1},     {"blue_2", C_BLUE_2},
+            {"blue_3", C_BLUE_3},      {"blue_4", C_BLUE_4},     {"blue_5", C_BLUE_5},
+            {"yellow_1", C_YELLOW_1},  {"yellow_2", C_YELLOW_2}, {"yellow_3", C_YELLOW_3},
+            {"yellow_4", C_YELLOW_4},  {"yellow_5", C_YELLOW_5}, {"purple_1", C_PURPLE_1},
+            {"purple_2", C_PURPLE_2},  {"purple_3", C_PURPLE_3}, {"purple_4", C_PURPLE_4},
+            {"purple_5", C_PURPLE_5},  {"cyan_1", C_CYAN_1},     {"cyan_2", C_CYAN_2},
+            {"cyan_3", C_CYAN_3},      {"cyan_4", C_CYAN_4},     {"cyan_5", C_CYAN_5},
+            {"grey_1", C_GREY_1},      {"grey_2", C_GREY_2},
     };
     *count = sizeof(map) / sizeof(map[0]);
     return map;
@@ -50,16 +27,16 @@ static const ColorNameEntry* get_color_map(int* count) {
 
 static const ConfigMapEntry* get_global_key_map(int* count) {
     static const ConfigMapEntry map[] = {
-        {"level_nr", offsetof(conf_t, level_nr), TYPE_INT},
-        {"window_height", offsetof(conf_t, window_height), TYPE_INT},
-        {"window_width", offsetof(conf_t, window_width), TYPE_INT},
-        {"star_quota", offsetof(conf_t, star_quota), TYPE_INT},
-        {"timer", offsetof(conf_t, timer), TYPE_FLOAT},
-        {"star_spawn", offsetof(conf_t, star_spawn), TYPE_FLOAT},
-        {"hunter_spawn", offsetof(conf_t, hunter_spawn), TYPE_FLOAT},
-        {"min_speed", offsetof(conf_t, min_speed), TYPE_INT},
-        {"max_speed", offsetof(conf_t, max_speed), TYPE_INT},
-        {"seed", offsetof(conf_t, seed), TYPE_INT},
+            {"level_nr", offsetof(conf_t, level_nr), TYPE_INT},
+            {"window_height", offsetof(conf_t, window_height), TYPE_INT},
+            {"window_width", offsetof(conf_t, window_width), TYPE_INT},
+            {"star_quota", offsetof(conf_t, star_quota), TYPE_INT},
+            {"timer", offsetof(conf_t, timer), TYPE_FLOAT},
+            {"star_spawn", offsetof(conf_t, star_spawn), TYPE_FLOAT},
+            {"hunter_spawn", offsetof(conf_t, hunter_spawn), TYPE_FLOAT},
+            {"min_speed", offsetof(conf_t, min_speed), TYPE_INT},
+            {"max_speed", offsetof(conf_t, max_speed), TYPE_INT},
+            {"seed", offsetof(conf_t, seed), TYPE_INT},
     };
     *count = sizeof(map) / sizeof(map[0]);
     return map;
@@ -67,12 +44,12 @@ static const ConfigMapEntry* get_global_key_map(int* count) {
 
 static const ConfigMapEntry* get_hunter_key_map(int* count) {
     static const ConfigMapEntry map[] = {
-        {"width", offsetof(HunterTypes, width), TYPE_INT},
-        {"height", offsetof(HunterTypes, height), TYPE_INT},
-        {"bounces", offsetof(HunterTypes, bounces), TYPE_INT},
-        {"speed", offsetof(HunterTypes, speed), TYPE_INT},
-        {"damage", offsetof(HunterTypes, damage), TYPE_INT},
-        {"color",   offsetof(HunterTypes, color), TYPE_COLOR},
+            {"width", offsetof(HunterTypes, width), TYPE_INT},
+            {"height", offsetof(HunterTypes, height), TYPE_INT},
+            {"bounces", offsetof(HunterTypes, bounces), TYPE_INT},
+            {"speed", offsetof(HunterTypes, speed), TYPE_INT},
+            {"damage", offsetof(HunterTypes, damage), TYPE_INT},
+            {"color", offsetof(HunterTypes, color), TYPE_COLOR},
     };
     *count = sizeof(map) / sizeof(map[0]);
     return map;

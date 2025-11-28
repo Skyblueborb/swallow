@@ -67,10 +67,20 @@ typedef struct Star {
 } Star;
 
 // Hunter Types
+typedef enum {
+    HUNTER_IDLE,
+    HUNTER_PAUSED,
+    HUNTER_DASHING
+} HunterState;
+
 typedef struct Hunter {
     entity_t ent;
     int bounces;
     int damage;
+    HunterState state;
+    int state_timer;
+    int base_speed;
+    int dash_cooldown;
     struct Hunter *next;
 } Hunter;
 
@@ -132,6 +142,7 @@ typedef struct {
     float time_left;
     int game_speed;
     int stars_collected;
+    int albatross_cooldown;
     GameEntities entities;
 } Game;
 

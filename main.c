@@ -13,6 +13,8 @@
 #include "physics.h"
 #include "types.h"
 #include "utils.h"
+#include "hunter.h"
+#include "swallow.h"
 
 void handle_input(Game* game, entity_t* swallow) {
     int ch = tolower(getch());
@@ -39,6 +41,9 @@ void handle_input(Game* game, entity_t* swallow) {
                 break;
             case 'p':
                 change_game_speed(game, UP);
+                break;
+            case 'e':
+                call_albatross_taxi(game);
                 break;
         }
     }
@@ -112,6 +117,9 @@ void game_loop(Game* game) {
 
     handle_hunter_spawner(game);
     handle_star_spawner(game);
+    if (game->albatross_cooldown > 0) {
+        game->albatross_cooldown--;
+    }
 
     game->time_left -= delta_seconds;
     check_game_over(game);
@@ -138,7 +146,7 @@ int main() {
 
     get_username(&game);
 
-    char *level_path = select_level(&game);
+    char* level_path = select_level(&game);
 
     game.config = read_config(level_path);
     free(level_path);

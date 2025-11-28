@@ -149,3 +149,13 @@ Star* find_star_collision(Game* game, Star** prev_out, int area_x, int area_y, i
     }
     return NULL;
 }
+
+int is_touching(entity_t* s, entity_t* t) {
+    int tolerance = 1;
+
+    if (s->x < t->x + t->width + tolerance && s->x + s->width > t->x - tolerance &&
+        s->y < t->y + t->height + tolerance && s->y + s->height > t->y - tolerance) {
+        return 1;
+    }
+    return 0;
+}

@@ -51,10 +51,13 @@ void draw_status(Game* game) {
     box(win, 0, 0);
     wattroff(win, COLOR_PAIR(C_GREY_1));
     wattron(win, A_BOLD);
-    mvwprintw(win, 1, 2, "Player: %s | Level %-2d | Life-force: %-3d", game->username, game->config.level_nr, game->entities.swallow->hp);
+    mvwprintw(win, 1, 2, "Player: %s | Level %-2d | Life-force: %-3d", game->username,
+              game->config.level_nr, game->entities.swallow->hp);
     mvwprintw(win, 2, 2, "Stars collected: %-3d | Star Quota: %-3d | Time left: %.1f",
               game->stars_collected, game->config.star_quota, game->time_left);
     mvwprintw(win, 3, 2, "Game speed: %-3d", game->game_speed);
+    mvwprintw(win, 4, 2, "Taxi cooldown: %-3d",
+              game->albatross_cooldown > 0 ? game->albatross_cooldown : 0);
     wattroff(win, A_BOLD);
     wnoutrefresh(win);
 }
