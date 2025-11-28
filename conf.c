@@ -37,6 +37,9 @@ static const ConfigMapEntry* get_global_key_map(int* count) {
             {"min_speed", offsetof(conf_t, min_speed), TYPE_INT},
             {"max_speed", offsetof(conf_t, max_speed), TYPE_INT},
             {"seed", offsetof(conf_t, seed), TYPE_INT},
+            {"score_time_weight", offsetof(conf_t, score_time_weight), TYPE_FLOAT},
+            {"score_stars_weight", offsetof(conf_t, score_stars_weight), TYPE_FLOAT},
+            {"score_life_weight", offsetof(conf_t, score_life_weight), TYPE_FLOAT},
     };
     *count = sizeof(map) / sizeof(map[0]);
     return map;

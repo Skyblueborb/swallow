@@ -102,6 +102,9 @@ typedef struct {
     float timer;
     float star_spawn;
     float hunter_spawn;
+    float score_time_weight;
+    float score_stars_weight;
+    float score_life_weight;
     int min_speed;
     int max_speed;
     int seed;
@@ -137,13 +140,28 @@ typedef struct {
     WIN main_win;
     WIN status_win;
     char running;
+    char menu_running;
     char **occupancy_map;
     char *username;
     float time_left;
     int game_speed;
     int stars_collected;
     int albatross_cooldown;
+    float score;
     GameEntities entities;
 } Game;
+
+typedef struct RankingNode {
+    int score;
+    char username[50];
+    struct RankingNode *next;
+} RankingNode;
+
+typedef enum {
+    MENU_START_GAME = 0,
+    MENU_HIGH_SCORES,
+    MENU_USERNAME,
+    MENU_EXIT
+} MenuOption;
 
 #endif // TYPES_H

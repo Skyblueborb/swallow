@@ -1,4 +1,5 @@
 #include "types.h"
+#include "string.h"
 
 void draw_sprite(Game* game, entity_t* entity) {
     char* sprite_grid = entity->sprites[entity->direction];
@@ -58,6 +59,7 @@ void draw_status(Game* game) {
     mvwprintw(win, 3, 2, "Game speed: %-3d", game->game_speed);
     mvwprintw(win, 4, 2, "Taxi cooldown: %-3d",
               game->albatross_cooldown > 0 ? game->albatross_cooldown : 0);
+    mvwprintw(win, 5, 2, "Score: %d", (int)game->score);
     wattroff(win, A_BOLD);
     wnoutrefresh(win);
 }
@@ -68,4 +70,28 @@ void draw_main(Game* game) {
     box(win, 0, 0);
     wattroff(win, COLOR_PAIR(C_GREY_1));
     wnoutrefresh(win);
+}
+
+void draw_ascii_art(Game *game, int center_x, int art_start_y) {
+    WINDOW *win = game->main_win.window;
+    const char *ascii_art[] = {
+        "  _________               .__  .__                    _________ __                       ",
+        " /   _____/_  _  _______  |  | |  |   ______  _  __  /   _____//  |______ _______  ______",
+        " \\_____  \\\\ \\/ \\/ /\\__  \\ |  | |  |  /  _ \\ \\/ \\/ /  \\_____  \\\\   __\\__  \\\\_  __ \\/  ___/",
+        " /        \\\\     /  / __ \\|  |_|  |_(  <_> )     /   /        \\|  |  / __ \\|  | \\/\\___ \\ ",
+        "/_______  / \\/\\_/  (____  /____/____/\\____/ \\/\\_/   /_______  /|__| (____  /__|  /____  >",
+        "        \\/              \\/                                  \\/           \\/           \\/"
+    };
+    int art_lines = 6;
+
+    if (art_start_y < 1) art_start_y = 1;
+
+    wattron(win, COLOR_PAIR(PAIR_PLAYER) | A_BOLD);
+    for (int i = 0; i < art_lines; i++) {
+        int len = strlen(ascii_art[i]);
+        int x = center_x - (len / 2);
+        if (x < 1) x = 1;
+        mvwprintw(win, art_start_y + i, x, "%s", ascii_art[i]);
+    }
+    wattroff(win, COLOR_PAIR(PAIR_PLAYER) | A_BOLD);
 }

@@ -17,6 +17,8 @@
 #include "hunter.h"
 #include "swallow.h"
 #include "star.h"
+#include "ranking.h"
+#include "menu.h"
 
 void handle_input(Game* game, entity_t* swallow) {
     int ch = tolower(getch());
@@ -98,6 +100,8 @@ static void check_game_over(Game* game) {
 
     if (game->stars_collected >= game->config.star_quota) {
         game->running = 0;
+        game->score += game->time_left * game->config.score_time_weight + game->entities.swallow->hp * game->config.score_life_weight;
+        game->score *= game->config.level_nr;
     }
 
     if (game->time_left <= 0) {
@@ -135,52 +139,35 @@ void game_loop(Game* game) {
 
 int main() {
     setlocale(LC_ALL, "");
+    srand(time(NULL));
     Game game = {0};
+
+    init_curses();
 
     conf_t initial_conf = {0};
     initial_conf.window_height = 32;
-    initial_conf.window_width = 80;
-
-    srand(game.config.seed);
-    init_curses();
+    initial_conf.window_width = 100;
 
     setup_windows(&game.main_win, &game.status_win, &initial_conf);
+    wclear(game.status_win.window);
+    wrefresh(game.status_win.window);
 
     get_username(&game);
 
-    char* level_path = select_level(&game);
-
-    game.config = read_config(level_path);
-    free(level_path);
-
-    delwin(game.main_win.window);
-    delwin(game.status_win.window);
-
-    setup_windows(&game.main_win, &game.status_win, &game.config);
-
-    init_occupancy_map(&game);
-
-    game.running = 1;
-    game.game_speed = 3;
-    game.time_left = game.config.timer;
-
-    Swallow swallow;
-    init_swallow(&game, &swallow);
-
-    game.entities.swallow = &swallow;
-
-    while (game.running) {
-        game_loop(&game);
+    game.menu_running = 1;
+    while (game.menu_running) {
+        MenuOption choice = show_start_menu(&game);
+        menu_loop(&game, choice);
     }
 
     delwin(game.main_win.window);
     delwin(game.status_win.window);
     endwin();
-    if (game.username) {
-        free(game.username);
-    }
+
+    if (game.username) free(game.username);
     free_config(&game.config);
     free_occupancy_map(&game);
     free_hunters(&game);
+
     return 0;
 }

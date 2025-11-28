@@ -18,6 +18,7 @@ void collect_stars(Game* game) {
     while (current != NULL) {
         if (is_touching(&current->ent, &swallow->ent)) {
             game->stars_collected++;
+            game->score += game->config.score_stars_weight;
             current = remove_star(game, current, prev);
         } else {
             prev = current;
@@ -42,6 +43,7 @@ void move_stars(Game* game) {
             current->ent.x < swallow->ent.x + swallow->ent.width &&
             current->ent.x + current->ent.width > swallow->ent.x) {
             game->stars_collected++;
+            game->score += game->config.score_stars_weight;
             current = remove_star(game, current, prev);
             continue;
         }
@@ -51,6 +53,7 @@ void move_stars(Game* game) {
         if (ret != EMPTY) {
             if (ret == SWALLOW) {
                 game->stars_collected++;
+                game->score += game->config.score_stars_weight;
             }
             current = remove_star(game, current, prev);
         } else {

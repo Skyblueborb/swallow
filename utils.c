@@ -73,6 +73,7 @@ void init_curses() {
     noecho();
     curs_set(0);
     nodelay(stdscr, TRUE);
+    keypad(stdscr, TRUE);
     refresh();
 }
 
@@ -267,7 +268,7 @@ char* select_level(Game* game) {
     WINDOW* win = game->main_win.window;
     int sel = 0, c, cx = (game->main_win.cols - 20) / 2;
 
-    nodelay(stdscr, FALSE);
+    nodelay(game->main_win.window, FALSE);
     keypad(win, TRUE);
 
     while (1) {
@@ -297,7 +298,7 @@ char* select_level(Game* game) {
     for (int i = 0; i < count; i++) free(files[i]);
     free(files);
 
-    nodelay(stdscr, TRUE);
+    nodelay(game->main_win.window, TRUE);
     keypad(win, FALSE);
     wclear(win);
     wrefresh(win);
