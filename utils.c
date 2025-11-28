@@ -221,21 +221,6 @@ void init_swallow(Game* game, Swallow* swallow) {
             "./.";
 }
 
-int count_hunters(Game* game) {
-    int count = 0;
-    for (Hunter* h = game->entities.hunters; h; h = h->next) count++;
-    return count;
-}
-
-void free_hunters(Game* game) {
-    Hunter* h = game->entities.hunters;
-    while (h != NULL) {
-        Hunter* next = h->next;
-        free(h);
-        h = next;
-    }
-}
-
 static int load_levels(char*** files) {
     DIR* d = opendir("levels");
     int count = 0;

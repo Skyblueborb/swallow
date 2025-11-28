@@ -15,10 +15,10 @@
 #include "utils.h"
 
 #include "hunter.h"
-#include "swallow.h"
-#include "star.h"
-#include "ranking.h"
 #include "menu.h"
+#include "ranking.h"
+#include "star.h"
+#include "swallow.h"
 
 void handle_input(Game* game, entity_t* swallow) {
     int ch = tolower(getch());
@@ -100,7 +100,8 @@ static void check_game_over(Game* game) {
 
     if (game->stars_collected >= game->config.star_quota) {
         game->running = 0;
-        game->score += game->time_left * game->config.score_time_weight + game->entities.swallow->hp * game->config.score_life_weight;
+        game->score += game->time_left * game->config.score_time_weight +
+                       game->entities.swallow->hp * game->config.score_life_weight;
         game->score *= game->config.level_nr;
     }
 
@@ -165,9 +166,11 @@ int main() {
     endwin();
 
     if (game.username) free(game.username);
+    if (game.entities.swallow) free(game.entities.swallow);
     free_config(&game.config);
     free_occupancy_map(&game);
-    free_hunters(&game);
+    if (game.entities.hunters != NULL) free_hunters(&game);
+    if (game.entities.stars != NULL) free_stars(&game);
 
     return 0;
 }

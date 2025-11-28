@@ -8,25 +8,24 @@ typedef struct {
     char username[50];
 } SortEntry;
 
-
-static int compare_scores(const void *a, const void *b) {
-    SortEntry *entryA = (SortEntry *)a;
-    SortEntry *entryB = (SortEntry *)b;
+static int compare_scores(const void* a, const void* b) {
+    SortEntry* entryA = (SortEntry*)a;
+    SortEntry* entryB = (SortEntry*)b;
     return (entryB->score - entryA->score);
 }
 
 RankingNode* load_rankings() {
-    FILE *file = fopen("ranking.txt", "r");
+    FILE* file = fopen("ranking.txt", "r");
     if (!file) return NULL;
 
-    RankingNode *head = NULL;
-    RankingNode *tail = NULL;
+    RankingNode* head = NULL;
+    RankingNode* tail = NULL;
 
     int score;
     char name[50];
 
     while (fscanf(file, "%d %49s", &score, name) == 2) {
-        RankingNode *new_node = malloc(sizeof(RankingNode));
+        RankingNode* new_node = malloc(sizeof(RankingNode));
         if (!new_node) break;
 
         new_node->score = score;
@@ -46,20 +45,20 @@ RankingNode* load_rankings() {
     return head;
 }
 
-void free_rankings(RankingNode *head) {
-    RankingNode *current = head;
+void free_rankings(RankingNode* head) {
+    RankingNode* current = head;
     while (current != NULL) {
-        RankingNode *next = current->next;
+        RankingNode* next = current->next;
         free(current);
         current = next;
     }
 }
 
-void save_ranking(Game *game) {
-    SortEntry *entries = NULL;
+void save_ranking(Game* game) {
+    SortEntry* entries = NULL;
     int count = 0;
 
-    FILE *read_file = fopen("ranking.txt", "r");
+    FILE* read_file = fopen("ranking.txt", "r");
     if (read_file) {
         int temp_score;
         char temp_name[50];
@@ -80,7 +79,7 @@ void save_ranking(Game *game) {
 
     qsort(entries, count, sizeof(SortEntry), compare_scores);
 
-    FILE *write_file = fopen("ranking.txt", "w");
+    FILE* write_file = fopen("ranking.txt", "w");
     if (!write_file) {
         if (entries) free(entries);
         return;

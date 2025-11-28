@@ -1,15 +1,15 @@
-#include "types.h"
-#include "ranking.h"
-#include "graphics.h"
-#include "star.h"
 #include <unistd.h>
-#include "utils.h"
 #include "conf.h"
+#include "graphics.h"
+#include "ranking.h"
+#include "star.h"
+#include "types.h"
+#include "utils.h"
 
-void show_high_scores(Game *game) {
-    WINDOW *win = game->main_win.window;
-    RankingNode *scores = load_rankings();
-    RankingNode *current = scores;
+static void show_high_scores(Game* game) {
+    WINDOW* win = game->main_win.window;
+    RankingNode* scores = load_rankings();
+    RankingNode* current = scores;
 
     wclear(win);
     box(win, 0, 0);
@@ -28,30 +28,30 @@ void show_high_scores(Game *game) {
     free_rankings(scores);
 
     flushinp();
-    nodelay(stdscr, FALSE);
     wgetch(win);
-    nodelay(stdscr, TRUE);
 }
 
-static void update_and_draw_menu_stars(Game *game, WINDOW *win) {
-    if ((rand() % 5) == 0) { // 10% chance per tick
+static void draw_menu_stars(Game* game, WINDOW* win) {
+    if ((rand() % 5) == 0) {
         spawn_star(game);
     }
 
-    Star *curr = game->entities.stars;
-    Star *prev = NULL;
+    Star* curr = game->entities.stars;
+    Star* prev = NULL;
 
     wattron(win, A_BOLD);
 
     while (curr != NULL) {
         draw_sprite(game, &curr->ent);
 
-        curr->ent.y += 1;
+        curr->ent.y += curr->ent.dy;
 
         if (curr->ent.y >= game->main_win.rows - 1) {
-            Star *to_free = curr;
-            if (prev == NULL) game->entities.stars = curr->next;
-            else prev->next = curr->next;
+            Star* to_free = curr;
+            if (prev == NULL)
+                game->entities.stars = curr->next;
+            else
+                prev->next = curr->next;
 
             curr = curr->next;
             free(to_free);
@@ -64,16 +64,11 @@ static void update_and_draw_menu_stars(Game *game, WINDOW *win) {
     wattroff(win, A_BOLD);
 }
 
-MenuOption show_start_menu(Game *game) {
-    WINDOW *win = game->main_win.window;
+MenuOption show_start_menu(Game* game) {
+    WINDOW* win = game->main_win.window;
     int selection = 0;
     int num_options = 4;
-    const char *options[] = {
-        "START GAME",
-        "HIGH SCORES",
-        "CHANGE USERNAME",
-        "EXIT"
-    };
+    const char* options[] = {"START GAME", "HIGH SCORES", "CHANGE USERNAME", "EXIT"};
 
     game->entities.stars = NULL;
 
@@ -84,7 +79,7 @@ MenuOption show_start_menu(Game *game) {
         wclear(win);
         box(win, 0, 0);
 
-        update_and_draw_menu_stars(game, win);
+        draw_menu_stars(game, win);
 
         int center_x = game->main_win.cols / 2;
         int art_start_y = 1;
@@ -124,10 +119,9 @@ MenuOption show_start_menu(Game *game) {
         usleep(50000);
     }
 
-    // Cleanup Menu Stars
-    Star *curr = game->entities.stars;
+    Star* curr = game->entities.stars;
     while (curr) {
-        Star *next = curr->next;
+        Star* next = curr->next;
         free(curr);
         curr = next;
     }
@@ -140,13 +134,11 @@ MenuOption show_start_menu(Game *game) {
     return (MenuOption)selection;
 }
 
-extern void game_loop(Game *game);
-
 void menu_loop(Game* game, MenuOption choice) {
     wclear(game->status_win.window);
     wrefresh(game->status_win.window);
     char* level_path;
-    switch(choice) {
+    switch (choice) {
         case MENU_START_GAME:
             level_path = select_level(game);
             game->config = read_config(level_path);
@@ -162,10 +154,10 @@ void menu_loop(Game* game, MenuOption choice) {
             game->time_left = game->config.timer;
             game->score = 0.f;
 
-            Swallow swallow;
-            init_swallow(game, &swallow);
+            Swallow* swallow = malloc(sizeof(Swallow));
+            init_swallow(game, swallow);
 
-            game->entities.swallow = &swallow;
+            game->entities.swallow = swallow;
 
             while (game->running) {
                 game_loop(game);

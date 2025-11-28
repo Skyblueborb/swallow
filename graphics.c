@@ -1,5 +1,5 @@
-#include "types.h"
 #include "string.h"
+#include "types.h"
 
 void draw_sprite(Game* game, entity_t* entity) {
     char* sprite_grid = entity->sprites[entity->direction];
@@ -72,16 +72,21 @@ void draw_main(Game* game) {
     wnoutrefresh(win);
 }
 
-void draw_ascii_art(Game *game, int center_x, int art_start_y) {
-    WINDOW *win = game->main_win.window;
-    const char *ascii_art[] = {
-        "  _________               .__  .__                    _________ __                       ",
-        " /   _____/_  _  _______  |  | |  |   ______  _  __  /   _____//  |______ _______  ______",
-        " \\_____  \\\\ \\/ \\/ /\\__  \\ |  | |  |  /  _ \\ \\/ \\/ /  \\_____  \\\\   __\\__  \\\\_  __ \\/  ___/",
-        " /        \\\\     /  / __ \\|  |_|  |_(  <_> )     /   /        \\|  |  / __ \\|  | \\/\\___ \\ ",
-        "/_______  / \\/\\_/  (____  /____/____/\\____/ \\/\\_/   /_______  /|__| (____  /__|  /____  >",
-        "        \\/              \\/                                  \\/           \\/           \\/"
-    };
+void draw_ascii_art(Game* game, int center_x, int art_start_y) {
+    WINDOW* win = game->main_win.window;
+    const char* ascii_art[] = {
+            "  _________               .__  .__                    _________ __                    "
+            "   ",
+            " /   _____/_  _  _______  |  | |  |   ______  _  __  /   _____//  |______ _______  "
+            "______",
+            " \\_____  \\\\ \\/ \\/ /\\__  \\ |  | |  |  /  _ \\ \\/ \\/ /  \\_____  \\\\   __\\__ "
+            " \\\\_  __ \\/  ___/",
+            " /        \\\\     /  / __ \\|  |_|  |_(  <_> )     /   /        \\|  |  / __ \\|  | "
+            "\\/\\___ \\ ",
+            "/_______  / \\/\\_/  (____  /____/____/\\____/ \\/\\_/   /_______  /|__| (____  /__|  "
+            "/____  >",
+            "        \\/              \\/                                  \\/           \\/       "
+            "    \\/"};
     int art_lines = 6;
 
     if (art_start_y < 1) art_start_y = 1;

@@ -1,8 +1,8 @@
 #include <stddef.h>
 
-#include "types.h"
-#include "physics.h"
 #include "entity.h"
+#include "physics.h"
+#include "types.h"
 
 static void get_spawn_coordinates(Game* game, entity_t* hunter_ent, direction_t side) {
     int w = hunter_ent->width;
@@ -200,4 +200,9 @@ void process_hunters(Game* game) {
         prev = current;
         current = current->next;
     }
+}
+
+void free_hunters(Game* game) {
+    free_generic_list(game, game->entities.hunters, offsetof(Hunter, next), offsetof(Hunter, ent));
+    game->entities.hunters = NULL;
 }

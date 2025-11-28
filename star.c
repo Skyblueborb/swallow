@@ -1,9 +1,8 @@
 #include <stddef.h>
 
-#include "types.h"
 #include "entity.h"
 #include "physics.h"
-
+#include "types.h"
 
 Star* remove_star(Game* game, Star* current, Star* prev) {
     return (Star*)remove_generic_node(game, (void**)&game->entities.stars, current, prev,
@@ -84,4 +83,9 @@ void spawn_star(Game* game) {
 
     star->next = game->entities.stars;
     game->entities.stars = star;
+}
+
+void free_stars(Game* game) {
+    free_generic_list(game, game->entities.stars, offsetof(Star, next), offsetof(Star, ent));
+    game->entities.stars = NULL;
 }
