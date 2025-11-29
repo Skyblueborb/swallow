@@ -280,8 +280,11 @@ char* select_level(Game* game) {
             break;
     }
 
-    char* res = malloc(strlen(files[sel]) + 8);
-    sprintf(res, "levels/%s", files[sel]);
+
+    // strlen("levels/") = 8
+    int length = strlen(files[sel]);
+    char* res = malloc(length + 8);
+    snprintf(res, length + 8, " levels/%s", files[sel]);
 
     for (int i = 0; i < count; i++) free(files[i]);
     free(files);

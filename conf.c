@@ -148,7 +148,7 @@ static void process_config_line(char* line, conf_t* config, int* hunter_idx) {
 
     if (strcmp(key, "hunter_templates_amount") == 0) {
         if (config->hunter_templates == NULL)
-            config->hunter_templates = malloc(atoi(value) * sizeof(HunterTypes));
+            config->hunter_templates = calloc(atoi(value), sizeof(HunterTypes));
     }
 
     if (strcmp(key, "hunter_template") == 0) {
