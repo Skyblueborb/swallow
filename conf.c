@@ -41,7 +41,6 @@ static const ConfigMapEntry* get_global_key_map(int* count) {
             {"score_time_weight", offsetof(conf_t, score_time_weight), TYPE_FLOAT},
             {"score_stars_weight", offsetof(conf_t, score_stars_weight), TYPE_FLOAT},
             {"score_life_weight", offsetof(conf_t, score_life_weight), TYPE_FLOAT},
-            {"hunter_templates_amount", offsetof(conf_t, hunter_templates_amount), TYPE_INT},
     };
     *count = sizeof(map) / sizeof(map[0]);
     return map;
@@ -61,7 +60,10 @@ static const ConfigMapEntry* get_hunter_key_map(int* count) {
 }
 
 static void parse_sprite(conf_t* config, int hunter_idx, const char* key, const char* value) {
+    if (hunter_idx < 0 || !config->hunter_templates) return;
     HunterTypes* hunter = &config->hunter_templates[hunter_idx];
+    if (hunter->width <= 0 || hunter->height <= 0) return;
+
     size_t size = hunter->width * hunter->height + 1;
     if (hunter->sprites[0] == NULL) {
         for (int i = 0; i < NUM_DIRECTIONS; i++) {
@@ -146,13 +148,16 @@ static void process_config_line(char* line, conf_t* config, int* hunter_idx) {
         value = "";
     }
 
-    if (strcmp(key, "hunter_templates_amount") == 0) {
-        if (config->hunter_templates == NULL)
-            config->hunter_templates = calloc(atoi(value), sizeof(HunterTypes));
-    }
-
     if (strcmp(key, "hunter_template") == 0) {
-        if (*hunter_idx < config->hunter_templates_amount) (*hunter_idx)++;
+        (*hunter_idx)++;
+        config->hunter_templates_amount = (*hunter_idx) + 1;
+
+        HunterTypes *temp = realloc(config->hunter_templates,
+                                    config->hunter_templates_amount * sizeof(HunterTypes));
+        if (!temp) exit(1);
+        config->hunter_templates = temp;
+
+        memset(&config->hunter_templates[*hunter_idx], 0, sizeof(HunterTypes));
     } else {
         parse_values(config, *hunter_idx, key, value);
     }
@@ -183,10 +188,11 @@ void free_config(conf_t* config) {
         return;
     }
 
-    for (int i = 0; i < 5; i++) {
+    for (int i = 0; i < config->hunter_templates_amount; i++) {
         for (int j = 0; j < NUM_DIRECTIONS; j++) {
             if (config->hunter_templates[i].sprites[j]) {
                 free(config->hunter_templates[i].sprites[j]);
+                config->hunter_templates[i].sprites[j] = NULL;
             }
         }
     }

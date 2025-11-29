@@ -155,6 +155,7 @@ MenuOption show_start_menu(Game* game) {
 
 static void start_game(Game* game) {
     char* level_path = select_level(game);
+    free_config(&game->config);
     game->config = read_config(level_path);
     free(level_path);
 
@@ -185,7 +186,6 @@ static void start_game(Game* game) {
     }
     show_high_scores(game);
 
-    free_config(&game->config);
     free_hunters(game);
     free_stars(game);
     free_occupancy_map(game);
