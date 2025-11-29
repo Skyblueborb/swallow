@@ -30,20 +30,34 @@ void collect_stars(Game* game) {
     }
 }
 
+static void update_star_color(Game* game, Star* star) {
+    int y = star->ent.y;
+    int height = game->main_win.rows;
+
+    if (height == 0) return;
+
+    float star_progress = (float)y / height;
+
+    if (star_progress < 0.2f) {
+        star->ent.color = C_YELLOW_5;
+    } else if (star_progress < 0.4f) {
+        star->ent.color = C_YELLOW_4;
+    } else if (star_progress < 0.6f) {
+        star->ent.color = C_YELLOW_3;
+    } else if (star_progress < 0.8f) {
+        star->ent.color = C_YELLOW_2;
+    } else {
+        star->ent.color = C_YELLOW_1;
+    }
+}
+
 void move_stars(Game* game) {
-    game->star_flicker_tick++;
-
-    int cycle_step = (game->star_flicker_tick / 2) % 8;
-    int color_offset = (cycle_step > 4) ? (8 - cycle_step) : cycle_step;
-
-    ColorPair flicker_color = C_YELLOW_1 + color_offset;
-
     Star* current = game->entities.stars;
     Star* prev = NULL;
     Swallow* swallow = game->entities.swallow;
 
     while (current != NULL) {
-        current->ent.color = flicker_color;
+        update_star_color(game, current);
 
         int s_top = current->ent.y;
         int s_bot = current->ent.y + current->ent.height + current->ent.speed;
@@ -88,7 +102,7 @@ void spawn_star(Game* game) {
 
     star->ent.x = 2 + (rand() % max_c);
     star->ent.y = 1;
-    star->ent.color = PAIR_STAR;
+    star->ent.color = C_YELLOW_5;
 
     change_entity_direction(&star->ent, DIR_DOWN, star->ent.speed);
 

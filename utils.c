@@ -52,8 +52,6 @@ void init_game_colors() {
 
     init_pair(PAIR_PLAYER, 51, -1);
 
-    init_pair(PAIR_STAR, 220, -1);
-
     init_pair(PAIR_DEFAULT, 255, -1);
 }
 
@@ -280,11 +278,8 @@ char* select_level(Game* game) {
             break;
     }
 
-
-    // strlen("levels/") = 8
-    int length = strlen(files[sel]);
-    char* res = malloc(length + 8);
-    snprintf(res, length + 8, " levels/%s", files[sel]);
+    char* res;
+    asprintf(&res, "levels/%s", files[sel]);
 
     for (int i = 0; i < count; i++) free(files[i]);
     free(files);

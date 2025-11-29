@@ -36,7 +36,6 @@ typedef enum {
 typedef enum {
     PAIR_DEFAULT = 1,
     PAIR_PLAYER,
-    PAIR_STAR,
 
     C_RED_1, C_RED_2, C_RED_3, C_RED_4, C_RED_5,
     C_GREEN_1, C_GREEN_2, C_GREEN_3, C_GREEN_4, C_GREEN_5,
