@@ -53,6 +53,9 @@ typedef struct {
     int speed;
     int height, width;
     char* sprites[NUM_DIRECTIONS];
+    char* anim_sprites[NUM_DIRECTIONS];
+    int anim_frame;
+    int anim_timer;
     direction_t direction;
     ColorPair color;
 } entity_t;

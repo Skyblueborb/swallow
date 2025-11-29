@@ -3,7 +3,13 @@
 #include "types.h"
 
 void draw_sprite(Game* game, entity_t* entity) {
-    char* sprite_grid = entity->sprites[entity->direction];
+    char* sprite_grid;
+    if (entity->anim_frame == 1 && entity->anim_sprites[entity->direction] != NULL) {
+        sprite_grid = entity->anim_sprites[entity->direction];
+    } else {
+        sprite_grid = entity->sprites[entity->direction];
+    }
+
     WINDOW* win = game->main_win.window;
 
     if (entity->color) {

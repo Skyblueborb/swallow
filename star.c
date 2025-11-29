@@ -103,6 +103,9 @@ void spawn_star(Game* game) {
     star->ent.x = 2 + (rand() % max_c);
     star->ent.y = 1;
     star->ent.color = C_YELLOW_5;
+    for (int i = 0; i < NUM_DIRECTIONS; i++) star->ent.anim_sprites[i] = NULL;
+    star->ent.anim_frame = 0;
+    star->ent.anim_timer = 0;
 
     change_entity_direction(&star->ent, DIR_DOWN, star->ent.speed);
 

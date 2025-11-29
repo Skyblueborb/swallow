@@ -69,6 +69,10 @@ static Hunter* init_hunter_data(Game* game, int template_idx) {
     hun->dash_cooldown = 0;
     hun->base_speed = t->speed;
 
+    for (int i = 0; i < NUM_DIRECTIONS; i++) hun->ent.anim_sprites[i] = NULL;
+    hun->ent.anim_frame = 0;
+    hun->ent.anim_timer = 0;
+
     hun->next = NULL;
 
     return hun;

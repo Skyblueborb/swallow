@@ -5,6 +5,8 @@
 #include "physics.h"
 #include "types.h"
 
+#define ANIMATION_TICKS 5
+
 static void handle_swallow_star(Game* game, Swallow* s) {
     Star* prev = NULL;
     int tx = s->ent.x + s->ent.dx;
@@ -48,6 +50,13 @@ static void update_swallow_color(Swallow* s) {
 
 void process_swallow(Game* game) {
     Swallow* s = game->entities.swallow;
+
+    s->ent.anim_timer++;
+    if (s->ent.anim_timer >= ANIMATION_TICKS) {
+        s->ent.anim_timer = 0;
+        s->ent.anim_frame = !s->ent.anim_frame;
+    }
+
     collision_t ret = process_entity_tick(game, &s->ent, SWALLOW);
 
     if (ret == STAR) {

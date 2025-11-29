@@ -205,21 +205,39 @@ void init_swallow(Game* game, Swallow* swallow) {
     s->dy = 0;
     s->color = C_GREEN_5;
     s->sprites[DIR_UP] =
-            ".^."
+            " ^ "
             "/o\\"
             ".Y.";
     s->sprites[DIR_DOWN] =
             "_w_"
             "\\o/"
-            ".v.";
+            " v ";
     s->sprites[DIR_LEFT] =
-            "./."
+            " /."
             "<o="
-            ".\\.";
+            " \\.";
     s->sprites[DIR_RIGHT] =
-            ".\\."
+            ".\\ "
             "=o>"
-            "./.";
+            "./ ";
+    s->anim_frame = 0;
+    s->anim_timer = 0;
+    s->anim_sprites[DIR_UP] =
+            " ^ "
+            "^o^"
+            ".Y.";
+    s->anim_sprites[DIR_DOWN] =
+            "_w_"
+            "vov"
+            " v ";
+    s->anim_sprites[DIR_LEFT] =
+            " --"
+            "<o="
+            " --";
+    s->anim_sprites[DIR_RIGHT] =
+            "-- "
+            "=o>"
+            "-- ";
 }
 
 static int load_levels(char*** files) {
