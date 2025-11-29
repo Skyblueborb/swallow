@@ -179,6 +179,10 @@ conf_t read_config(char* filename) {
 }
 
 void free_config(conf_t* config) {
+    if (config->hunter_templates == NULL) {
+        return;
+    }
+
     for (int i = 0; i < 5; i++) {
         for (int j = 0; j < NUM_DIRECTIONS; j++) {
             if (config->hunter_templates[i].sprites[j]) {
