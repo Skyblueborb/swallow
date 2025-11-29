@@ -191,4 +191,5 @@ void free_config(conf_t* config) {
         }
     }
     free(config->hunter_templates);
+    config->hunter_templates = NULL;
 }

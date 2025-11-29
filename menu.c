@@ -12,7 +12,9 @@ static void show_high_scores(Game* game) {
     RankingNode* current = scores;
 
     wclear(win);
+    wattron(win, COLOR_PAIR(C_GREY_1));
     box(win, 0, 0);
+    wattroff(win, COLOR_PAIR(C_GREY_1));
     mvwprintw(win, 1, 2, "HIGH SCORES:");
 
     int row = 3;
@@ -116,7 +118,9 @@ MenuOption show_start_menu(Game* game) {
 
     while (1) {
         wclear(win);
+        wattron(win, COLOR_PAIR(C_GREY_1));
         box(win, 0, 0);
+        wattroff(win, COLOR_PAIR(C_GREY_1));
 
         draw_menu_stars(game, win);
 
@@ -150,13 +154,14 @@ MenuOption show_start_menu(Game* game) {
 }
 
 static void start_game(Game* game) {
-    char* level_path;
-    level_path = select_level(game);
+    char* level_path = select_level(game);
     game->config = read_config(level_path);
     free(level_path);
+
     delwin(game->main_win.window);
     delwin(game->status_win.window);
     setup_windows(&game->main_win, &game->status_win, &game->config);
+
     srand(game->config.seed);
     init_occupancy_map(game);
 
@@ -179,11 +184,14 @@ static void start_game(Game* game) {
         save_ranking(game);
     }
     show_high_scores(game);
+
+    free_config(&game->config);
+    free_hunters(game);
+    free_stars(game);
+    free_occupancy_map(game);
 }
 
 void menu_loop(Game* game, MenuOption choice) {
-    wclear(game->status_win.window);
-    wrefresh(game->status_win.window);
     switch (choice) {
         case MENU_START_GAME:
             start_game(game);

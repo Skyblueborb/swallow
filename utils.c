@@ -81,10 +81,12 @@ void get_username(Game* game) {
     int rows = game->main_win.rows;
     int cols = game->main_win.cols;
 
-    int center_y = rows / 2;
+    int center_y = rows / 2 - 10;
     int center_x = (cols - 16) / 2;
 
+    wattron(win, COLOR_PAIR(C_GREY_1));
     box(win, 0, 0);
+    wattroff(win, COLOR_PAIR(C_GREY_1));
     mvwprintw(win, center_y, center_x, "Enter Username: ");
     wmove(win, center_y + 1, center_x);
     wrefresh(win);
@@ -105,8 +107,9 @@ void get_username(Game* game) {
         strcpy(buffer, "Player");
     }
 
-    game->username = malloc(strlen(buffer) + 1);
-    if (game->username) {
+    char* new_ptr = realloc(game->username, strlen(buffer) + 1);
+    if (new_ptr) {
+        game->username = new_ptr;
         strcpy(game->username, buffer);
     } else {
         exit(1);
@@ -132,10 +135,33 @@ void setup_windows(WIN* main_win, WIN* status_win, const conf_t* config) {
     status_win->x = 0;
     status_win->window = newwin(status_win->rows, status_win->cols, status_win->y, status_win->x);
 
-    box(main_win->window, 0, 0);
-    box(status_win->window, 0, 0);
     wrefresh(main_win->window);
     wrefresh(status_win->window);
+}
+
+void setup_menu_window(WIN* menu_win) {
+    int rows = 32;
+    int cols = 100;
+    int x = 0;
+    int y = 0;
+
+    if (menu_win->window) {
+        wclear(stdscr);
+        wrefresh(stdscr);
+        delwin(menu_win->window);
+    }
+
+    menu_win->window = newwin(rows, cols, y, x);
+    menu_win->rows = rows;
+    menu_win->cols = cols;
+    menu_win->x = x;
+    menu_win->y = y;
+
+    wattron(menu_win->window, COLOR_PAIR(C_GREY_1));
+    box(menu_win->window, 0, 0);
+    wattroff(menu_win->window, COLOR_PAIR(C_GREY_1));
+
+    wrefresh(menu_win->window);
 }
 
 void free_occupancy_map(Game* game) {
@@ -277,7 +303,9 @@ char* select_level(Game* game) {
 
     while (1) {
         wclear(win);
+        wattron(win, COLOR_PAIR(C_GREY_1));
         box(win, 0, 0);
+        wattroff(win, COLOR_PAIR(C_GREY_1));
         mvwprintw(win, 2, cx, "SELECT LEVEL:");
 
         for (int i = 0; i < count; i++) {

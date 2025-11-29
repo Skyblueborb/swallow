@@ -165,18 +165,13 @@ int main() {
 
     init_curses();
 
-    conf_t initial_conf = {0};
-    initial_conf.window_height = 32;
-    initial_conf.window_width = 100;
-
-    setup_windows(&game.main_win, &game.status_win, &initial_conf);
-    wclear(game.status_win.window);
-    wrefresh(game.status_win.window);
+    setup_menu_window(&game.main_win);
 
     get_username(&game);
 
     game.menu_running = 1;
     while (game.menu_running) {
+        setup_menu_window(&game.main_win);
         MenuOption choice = show_start_menu(&game);
         menu_loop(&game, choice);
     }
@@ -191,7 +186,6 @@ int main() {
 
     if (game.username) free(game.username);
     free_config(&game.config);
-    free_occupancy_map(&game);
 
     return 0;
 }

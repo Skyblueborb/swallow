@@ -16,5 +16,6 @@ void get_username(Game *game);
 void strip_newline(char* str);
 char* select_level(Game *game);
 void game_loop(Game *game);
+void setup_menu_window(WIN* menu_win);
 
 #endif // UTILS_H
