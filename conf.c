@@ -152,7 +152,7 @@ static void process_config_line(char* line, conf_t* config, int* hunter_idx) {
         (*hunter_idx)++;
         config->hunter_templates_amount = (*hunter_idx) + 1;
 
-        HunterTypes *temp = realloc(config->hunter_templates,
+        HunterTypes* temp = realloc(config->hunter_templates,
                                     config->hunter_templates_amount * sizeof(HunterTypes));
         if (!temp) exit(1);
         config->hunter_templates = temp;
