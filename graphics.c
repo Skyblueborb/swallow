@@ -61,11 +61,10 @@ void draw_status(Game* game) {
     wattron(win, A_BOLD);
     mvwprintw(win, 1, 2, "Player: %s | Level %-2d | Life-force: %-3d", game->username,
               game->config.level_nr, game->entities.swallow->hp);
-    mvwprintw(win, 2, 2, "Stars collected: %-3d | Star Quota: %-3d | Time left: %.1f",
+    mvwprintw(win, 2, 2, "Stars collected: %-3d | Star Quota: %-3d | Time left: %.1f ",
               game->stars_collected, game->config.star_quota, game->time_left);
     mvwprintw(win, 3, 2, "Game speed: %-3d", game->game_speed);
-    mvwprintw(win, 4, 2, "Taxi cooldown: %-3d",
-              game->albatross_cooldown > 0 ? game->albatross_cooldown : 0);
+    mvwprintw(win, 4, 2, "Taxi cooldown: %.1f ", game->albatross_cooldown);
     mvwprintw(win, 5, 2, "Score: %-10d", (int)game->score);
     wattroff(win, A_BOLD);
     wnoutrefresh(win);
@@ -147,10 +146,10 @@ void draw_game_over(Game* game, int center_x, int art_start_y) {
 
 void draw_high_scores(Game* game, int center_x, int art_start_y) {
     const char* high_score_art[] = {
-        "▗▖ ▗▖▗▄▄▄▖ ▗▄▄▖▗▖ ▗▖     ▗▄▄▖ ▗▄▄▖ ▗▄▖ ▗▄▄▖ ▗▄▄▄▖ ▗▄▄▖   ",
-        "▐▌ ▐▌  █  ▐▌   ▐▌ ▐▌    ▐▌   ▐▌   ▐▌ ▐▌▐▌ ▐▌▐▌   ▐▌     ▀",
-        "▐▛▀▜▌  █  ▐▌▝▜▌▐▛▀▜▌     ▝▀▚▖▐▌   ▐▌ ▐▌▐▛▀▚▖▐▛▀▀▘ ▝▀▚▖  ▄",
-        "▐▌ ▐▌▗▄█▄▖▝▚▄▞▘▐▌ ▐▌    ▗▄▄▞▘▝▚▄▄▖▝▚▄▞▘▐▌ ▐▌▐▙▄▄▖▗▄▄▞▘   ",
+            "▗▖ ▗▖▗▄▄▄▖ ▗▄▄▖▗▖ ▗▖     ▗▄▄▖ ▗▄▄▖ ▗▄▖ ▗▄▄▖ ▗▄▄▄▖ ▗▄▄▖   ",
+            "▐▌ ▐▌  █  ▐▌   ▐▌ ▐▌    ▐▌   ▐▌   ▐▌ ▐▌▐▌ ▐▌▐▌   ▐▌     ▀",
+            "▐▛▀▜▌  █  ▐▌▝▜▌▐▛▀▜▌     ▝▀▚▖▐▌   ▐▌ ▐▌▐▛▀▚▖▐▛▀▀▘ ▝▀▚▖  ▄",
+            "▐▌ ▐▌▗▄█▄▖▝▚▄▞▘▐▌ ▐▌    ▗▄▄▞▘▝▚▄▄▖▝▚▄▞▘▐▌ ▐▌▐▙▄▄▖▗▄▄▞▘   ",
     };
     int art_lines = 4;
 

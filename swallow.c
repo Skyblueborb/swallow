@@ -168,5 +168,5 @@ void call_albatross_taxi(Game* game) {
     update_occupancy_map(game->occupancy_map, game->main_win.rows, game->main_win.cols, &s->ent,
                          SWALLOW);
 
-    game->albatross_cooldown = 300;
+    game->albatross_cooldown = game->config.albatross_cooldown;
 }

@@ -91,7 +91,7 @@ void get_username(Game* game) {
     wmove(win, center_y + 1, center_x);
     wrefresh(win);
 
-    nodelay(stdscr, FALSE);
+    nodelay(win, FALSE);
     echo();
     curs_set(1);
 
@@ -99,7 +99,7 @@ void get_username(Game* game) {
 
     noecho();
     curs_set(0);
-    nodelay(stdscr, TRUE);
+    nodelay(win, TRUE);
 
     strip_newline(buffer);
 

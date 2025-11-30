@@ -1,3 +1,4 @@
+#include <string.h>
 #include <unistd.h>
 #include "conf.h"
 #include "graphics.h"
@@ -10,16 +11,28 @@ static void show_high_scores(Game* game, int row_start) {
     WINDOW* win = game->main_win.window;
     RankingNode* scores = load_rankings();
     RankingNode* current = scores;
+    nodelay(win, FALSE);
 
     wattron(win, COLOR_PAIR(C_GREY_1));
     box(win, 0, 0);
     wattroff(win, COLOR_PAIR(C_GREY_1));
-    draw_high_scores(game, game->main_win.cols/2, row_start);
+    int center_x = game->main_win.cols / 2;
+    draw_high_scores(game, center_x, row_start);
 
-    int row = row_start + 5;
+    int row = row_start + ASCII_HIGH_SCORE_LINES;
     int index = 1;
+
+    if (current == NULL) {
+        const char* message = "So lonely here, go play the game!";
+        mvwprintw(win, row, center_x - strlen(message) / 2, "%s", message);
+    }
+
     while (current != NULL && row < game->main_win.rows - 1) {
-        mvwprintw(win, row, 4, "%d) %d - %s", index, current->score, current->username);
+        char* buf;
+        asprintf(&buf, "%d) %d - %s", index, current->score, current->username);
+        int length = strlen(buf);
+        mvwprintw(win, row, center_x - (length / 2), "%s", buf);
+        free(buf);
         row++;
         index++;
         current = current->next;
@@ -30,6 +43,8 @@ static void show_high_scores(Game* game, int row_start) {
 
     flushinp();
     wgetch(win);
+
+    nodelay(win, TRUE);
 }
 
 static void draw_menu_stars(Game* game, WINDOW* win) {
@@ -188,9 +203,12 @@ static void start_game(Game* game) {
 }
 
 static void game_over(Game* game) {
+    setup_menu_window(&game->main_win);
     nodelay(game->main_win.window, FALSE);
-    draw_game_over(game, game->main_win.cols/2, 1);
+    draw_game_over(game, game->main_win.cols / 2, 1);
     show_high_scores(game, 10);
+    flushinp();
+    usleep(50000);
     wgetch(game->main_win.window);
     nodelay(game->main_win.window, TRUE);
 }
@@ -202,14 +220,10 @@ void menu_loop(Game* game, MenuOption choice) {
             game_over(game);
             break;
         case MENU_HIGH_SCORES:
-            nodelay(game->main_win.window, FALSE);
-            show_high_scores(game, 0);
-            nodelay(game->main_win.window, TRUE);
+            show_high_scores(game, 1);
             break;
         case MENU_USERNAME:
-            nodelay(game->main_win.window, FALSE);
             get_username(game);
-            nodelay(game->main_win.window, TRUE);
             break;
         case MENU_EXIT:
             game->menu_running = 0;

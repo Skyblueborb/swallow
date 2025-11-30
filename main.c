@@ -146,9 +146,9 @@ void game_loop(Game* game) {
     handle_hunter_spawner(game);
     handle_star_spawner(game);
     if (game->albatross_cooldown > 0) {
-        game->albatross_cooldown--;
+        game->albatross_cooldown -= delta_seconds;
+        if (game->albatross_cooldown < 0) game->albatross_cooldown = 0;
     }
-
     game->time_left -= delta_seconds;
     check_game_over(game);
 

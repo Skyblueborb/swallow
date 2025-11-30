@@ -9,6 +9,10 @@
 #define WINNER 1
 #define LOSER 0
 
+#define ASCII_LOGO_LINES 6
+#define ASCII_WIN_LOOSE_LINES 8
+#define ASCII_HIGH_SCORE_LINES 4
+
 typedef struct {
     WINDOW* window;
     int x, y, rows, cols;
@@ -111,6 +115,7 @@ typedef struct {
     float score_time_weight;
     float score_stars_weight;
     float score_life_weight;
+    float albatross_cooldown;
     int min_speed;
     int max_speed;
     int seed;
@@ -154,7 +159,7 @@ typedef struct {
     float time_left;
     int game_speed;
     int stars_collected;
-    int albatross_cooldown;
+    float albatross_cooldown;
     int hunter_spawn_tick;
     int star_spawn_tick;
     int star_move_tick;
