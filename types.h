@@ -6,6 +6,8 @@
 #include <inttypes.h>
 
 #define MAX_SAFE_ZONE_ATTEMPTS 50
+#define WINNER 1
+#define LOSER 0
 
 typedef struct {
     WINDOW* window;
@@ -146,6 +148,7 @@ typedef struct {
     WIN status_win;
     char running;
     char menu_running;
+    char result;
     char **occupancy_map;
     char *username;
     float time_left;

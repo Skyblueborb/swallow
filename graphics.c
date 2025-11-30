@@ -79,9 +79,25 @@ void draw_main(Game* game) {
     wnoutrefresh(win);
 }
 
-void draw_ascii_art(Game* game, int center_x, int art_start_y) {
+void draw_ascii_art(Game* game, int center_x, int art_start_y, const char** ascii_art,
+                    int art_lines, ColorPair color) {
     WINDOW* win = game->main_win.window;
-    const char* ascii_art[] = {
+
+    if (art_start_y < 1) art_start_y = 1;
+
+    wattron(win, COLOR_PAIR(color));
+    for (int i = 0; i < art_lines; i++) {
+        int len = mbstowcs(NULL, ascii_art[i], 0);
+        int x = center_x - (len / 2);
+        if (x < 1) x = 1;
+        mvwprintw(win, art_start_y + i, x, "%s", ascii_art[i]);
+    }
+    wattroff(win, COLOR_PAIR(color));
+    wrefresh(win);
+}
+
+void draw_logo(Game* game, int center_x, int art_start_y) {
+    const char* logo_art[] = {
             "  _________               .__  .__                    _________ __                    "
             "   ",
             " /   _____/_  _  _______  |  | |  |   ______  _  __  /   _____//  |______ _______  "
@@ -94,16 +110,49 @@ void draw_ascii_art(Game* game, int center_x, int art_start_y) {
             "/____  >",
             "        \\/              \\/                                  \\/           \\/       "
             "    \\/"};
-    int art_lines = 6;
+    int logo_lines = 6;
+    draw_ascii_art(game, center_x, art_start_y, logo_art, logo_lines, PAIR_PLAYER);
+}
 
-    if (art_start_y < 1) art_start_y = 1;
+void draw_game_over(Game* game, int center_x, int art_start_y) {
+    const char* win_art[] = {
+            "          _______                      _______  _        _ ",
+            "|\\     /|(  ___  )|\\     /|  |\\     /|(  ___  )( (    /|( )",
+            "( \\   / )| (   ) || )   ( |  | )   ( || (   ) ||  \\  ( || |",
+            " \\ (_) / | |   | || |   | |  | | _ | || |   | ||   \\ | || |",
+            "  \\   /  | |   | || |   | |  | |( )| || |   | || (\\ \\) || |",
+            "   ) (   | |   | || |   | |  | || || || |   | || | \\   |(_)",
+            "   | |   | (___) || (___) |  | () () || (___) || )  \\  | _ ",
+            "   \\_/   (_______)(_______)  (_______)(_______)|/    )_)(_)",
+    };
 
-    wattron(win, COLOR_PAIR(PAIR_PLAYER) | A_BOLD);
-    for (int i = 0; i < art_lines; i++) {
-        int len = strlen(ascii_art[i]);
-        int x = center_x - (len / 2);
-        if (x < 1) x = 1;
-        mvwprintw(win, art_start_y + i, x, "%s", ascii_art[i]);
+    const char* lose_art[] = {
+            "          _______             _        _______  _______  _______          ",
+            "|\\     /|(  ___  )|\\     /|  ( \\      (  ___  )(  ____ \\(  ____ \\         ",
+            "( \\   / )| (   ) || )   ( |  | (      | (   ) || (    \\/| (    \\/         ",
+            " \\ (_) / | |   | || |   | |  | |      | |   | || (_____ | (__             ",
+            "  \\   /  | |   | || |   | |  | |      | |   | |(_____  )|  __)            ",
+            "   ) (   | |   | || |   | |  | |      | |   | |      ) || (               ",
+            "   | |   | (___) || (___) |  | (____/\\| (___) |/\\____) || (____/\\  _  _  _ ",
+            "   \\_/   (_______)(_______)  (_______/(_______)\\_______)(_______/ (_)(_)(_)"};
+
+    int art_lines = 8;
+
+    if (game->result == WINNER) {
+        draw_ascii_art(game, center_x, art_start_y, win_art, art_lines, C_GREEN_5);
+    } else {
+        draw_ascii_art(game, center_x, art_start_y, lose_art, art_lines, C_RED_5);
     }
-    wattroff(win, COLOR_PAIR(PAIR_PLAYER) | A_BOLD);
+}
+
+void draw_high_scores(Game* game, int center_x, int art_start_y) {
+    const char* high_score_art[] = {
+        "▗▖ ▗▖▗▄▄▄▖ ▗▄▄▖▗▖ ▗▖     ▗▄▄▖ ▗▄▄▖ ▗▄▖ ▗▄▄▖ ▗▄▄▄▖ ▗▄▄▖   ",
+        "▐▌ ▐▌  █  ▐▌   ▐▌ ▐▌    ▐▌   ▐▌   ▐▌ ▐▌▐▌ ▐▌▐▌   ▐▌     ▀",
+        "▐▛▀▜▌  █  ▐▌▝▜▌▐▛▀▜▌     ▝▀▚▖▐▌   ▐▌ ▐▌▐▛▀▚▖▐▛▀▀▘ ▝▀▚▖  ▄",
+        "▐▌ ▐▌▗▄█▄▖▝▚▄▞▘▐▌ ▐▌    ▗▄▄▞▘▝▚▄▄▖▝▚▄▞▘▐▌ ▐▌▐▙▄▄▖▗▄▄▞▘   ",
+    };
+    int art_lines = 4;
+
+    draw_ascii_art(game, center_x, art_start_y, high_score_art, art_lines, C_YELLOW_5);
 }

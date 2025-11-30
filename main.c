@@ -17,7 +17,6 @@
 
 #include "hunter.h"
 #include "menu.h"
-#include "ranking.h"
 #include "star.h"
 #include "swallow.h"
 
@@ -28,7 +27,6 @@ void handle_input(Game* game, entity_t* swallow) {
         switch (ch) {
             case 'q':
                 game->running = 0;
-                game->score = 0.f;
                 break;
             case 'w':
                 change_entity_direction(swallow, DIR_UP, swallow->speed);
@@ -92,11 +90,6 @@ static void handle_hunter_spawner(Game* game) {
 }
 
 static void check_game_over(Game* game) {
-    if (game->entities.swallow->hp <= 0) {
-        game->running = 0;
-        game->score = 0;
-    }
-
     if (game->stars_collected >= game->config.star_quota) {
         game->running = 0;
 
@@ -106,12 +99,19 @@ static void check_game_over(Game* game) {
         score += game->entities.swallow->hp * game->config.score_life_weight;
 
         game->score = score * game->config.level_nr;
+        game->result = WINNER;
     }
 
-    if (game->time_left <= 0) {
+    if (game->time_left <= 0 || game->entities.swallow->hp <= 0) {
+        float score = 0;
+        score += game->stars_collected * game->config.score_stars_weight;
+        score += game->time_left * game->config.score_time_weight;
+        score += game->entities.swallow->hp * game->config.score_life_weight;
+        game->score = score;
+
         game->time_left = 0;
         game->running = 0;
-        game->score = 0;
+        game->result = LOSER;
     }
 }
 

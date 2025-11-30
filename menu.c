@@ -6,18 +6,17 @@
 #include "types.h"
 #include "utils.h"
 
-static void show_high_scores(Game* game) {
+static void show_high_scores(Game* game, int row_start) {
     WINDOW* win = game->main_win.window;
     RankingNode* scores = load_rankings();
     RankingNode* current = scores;
 
-    wclear(win);
     wattron(win, COLOR_PAIR(C_GREY_1));
     box(win, 0, 0);
     wattroff(win, COLOR_PAIR(C_GREY_1));
-    mvwprintw(win, 1, 2, "HIGH SCORES:");
+    draw_high_scores(game, game->main_win.cols/2, row_start);
 
-    int row = 3;
+    int row = row_start + 5;
     int index = 1;
     while (current != NULL && row < game->main_win.rows - 1) {
         mvwprintw(win, row, 4, "%d) %d - %s", index, current->score, current->username);
@@ -126,7 +125,7 @@ MenuOption show_start_menu(Game* game) {
 
         int center_x = game->main_win.cols / 2;
         int art_start_y = 1;
-        draw_ascii_art(game, center_x, art_start_y);
+        draw_logo(game, center_x, art_start_y);
 
         int menu_start_y = art_start_y + 10;
         draw_menu_options(win, selection, num_options, options, menu_start_y, center_x);
@@ -181,24 +180,30 @@ static void start_game(Game* game) {
         game_loop(game);
     }
 
-    if ((int)game->score > 0 && game->entities.swallow->hp > 0) {
-        save_ranking(game);
-    }
-    show_high_scores(game);
+    save_ranking(game);
 
     free_hunters(game);
     free_stars(game);
     free_occupancy_map(game);
 }
 
+static void game_over(Game* game) {
+    nodelay(game->main_win.window, FALSE);
+    draw_game_over(game, game->main_win.cols/2, 1);
+    show_high_scores(game, 10);
+    wgetch(game->main_win.window);
+    nodelay(game->main_win.window, TRUE);
+}
+
 void menu_loop(Game* game, MenuOption choice) {
     switch (choice) {
         case MENU_START_GAME:
             start_game(game);
+            game_over(game);
             break;
         case MENU_HIGH_SCORES:
             nodelay(game->main_win.window, FALSE);
-            show_high_scores(game);
+            show_high_scores(game, 0);
             nodelay(game->main_win.window, TRUE);
             break;
         case MENU_USERNAME:
