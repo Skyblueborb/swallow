@@ -164,7 +164,7 @@ typedef struct {
     int star_spawn_tick;
     int star_move_tick;
     int star_flicker_tick;
-    float score;
+    int score;
     GameEntities entities;
 } Game;
 

@@ -10,7 +10,7 @@ void strip_newline(char* str) {
     }
 }
 
-void init_game_colors() {
+static void init_game_colors() {
     init_pair(C_RED_1, 52, -1);
     init_pair(C_RED_2, 88, -1);
     init_pair(C_RED_3, 124, -1);
@@ -73,50 +73,6 @@ void init_curses() {
     nodelay(stdscr, TRUE);
     keypad(stdscr, TRUE);
     refresh();
-}
-
-void get_username(Game* game) {
-    char buffer[50] = {0};
-    WINDOW* win = game->main_win.window;
-    int rows = game->main_win.rows;
-    int cols = game->main_win.cols;
-
-    int center_y = rows / 2 - 10;
-    int center_x = (cols - 16) / 2;
-
-    wattron(win, COLOR_PAIR(C_GREY_1));
-    box(win, 0, 0);
-    wattroff(win, COLOR_PAIR(C_GREY_1));
-    mvwprintw(win, center_y, center_x, "Enter Username: ");
-    wmove(win, center_y + 1, center_x);
-    wrefresh(win);
-
-    nodelay(win, FALSE);
-    echo();
-    curs_set(1);
-
-    wgetnstr(win, buffer, 49);
-
-    noecho();
-    curs_set(0);
-    nodelay(win, TRUE);
-
-    strip_newline(buffer);
-
-    if (strlen(buffer) == 0) {
-        strcpy(buffer, "Player");
-    }
-
-    char* new_ptr = realloc(game->username, strlen(buffer) + 1);
-    if (new_ptr) {
-        game->username = new_ptr;
-        strcpy(game->username, buffer);
-    } else {
-        exit(1);
-    }
-
-    wclear(win);
-    wrefresh(win);
 }
 
 void setup_windows(WIN* main_win, WIN* status_win, const conf_t* config) {
@@ -217,56 +173,11 @@ void change_game_speed(Game* game, increment_t increment) {
     }
 }
 
-void init_swallow(Game* game, Swallow* swallow) {
-    entity_t* s = &swallow->ent;
-
-    swallow->hp = 100;
-    s->width = 3;
-    s->height = 3;
-    s->x = game->main_win.cols / 2;
-    s->y = game->main_win.rows / 2;
-    s->speed = 1;
-    s->direction = DIR_RIGHT;
-    s->dx = s->speed;
-    s->dy = 0;
-    s->color = C_GREEN_5;
-    s->sprites[DIR_UP] =
-            " ^ "
-            "/o\\"
-            ".Y.";
-    s->sprites[DIR_DOWN] =
-            "_w_"
-            "\\o/"
-            " v ";
-    s->sprites[DIR_LEFT] =
-            " /."
-            "<o="
-            " \\.";
-    s->sprites[DIR_RIGHT] =
-            ".\\ "
-            "=o>"
-            "./ ";
-    s->anim_frame = 0;
-    s->anim_timer = 0;
-    s->anim_sprites[DIR_UP] =
-            " ^ "
-            "^o^"
-            ".Y.";
-    s->anim_sprites[DIR_DOWN] =
-            "_w_"
-            "vov"
-            " v ";
-    s->anim_sprites[DIR_LEFT] =
-            " --"
-            "<o="
-            " --";
-    s->anim_sprites[DIR_RIGHT] =
-            "-- "
-            "=o>"
-            "-- ";
+static int compare_levels(const void* a, const void* b) {
+    return strcmp(*(const char**)a, *(const char**)b);
 }
 
-static int load_levels(char*** files) {
+int load_levels(char*** files) {
     DIR* d = opendir("levels");
     int count = 0;
     struct dirent* dir;
@@ -283,57 +194,9 @@ static int load_levels(char*** files) {
         }
     }
     closedir(d);
+
+    if (*files && count > 1) {
+        qsort(*files, count, sizeof(char*), compare_levels);
+    }
     return count;
-}
-
-char* select_level(Game* game) {
-    char** files = NULL;
-    int count = load_levels(&files);
-
-    if (count == 0) {
-        if (files) free(files);
-        return strdup("config.txt");
-    }
-
-    WINDOW* win = game->main_win.window;
-    int sel = 0, c, cx = (game->main_win.cols - 20) / 2;
-
-    nodelay(game->main_win.window, FALSE);
-    keypad(win, TRUE);
-
-    while (1) {
-        wclear(win);
-        wattron(win, COLOR_PAIR(C_GREY_1));
-        box(win, 0, 0);
-        wattroff(win, COLOR_PAIR(C_GREY_1));
-        mvwprintw(win, 2, cx, "SELECT LEVEL:");
-
-        for (int i = 0; i < count; i++) {
-            if (i == sel) wattron(win, A_REVERSE);
-            mvwprintw(win, 4 + i, cx, "%s", files[i]);
-            if (i == sel) wattroff(win, A_REVERSE);
-        }
-        wrefresh(win);
-
-        c = wgetch(win);
-        if (c == KEY_UP)
-            sel = (sel - 1 + count) % count;
-        else if (c == KEY_DOWN)
-            sel = (sel + 1) % count;
-        else if (c == '\n')
-            break;
-    }
-
-    char* res;
-    asprintf(&res, "levels/%s", files[sel]);
-
-    for (int i = 0; i < count; i++) free(files[i]);
-    free(files);
-
-    nodelay(game->main_win.window, TRUE);
-    keypad(win, FALSE);
-    wclear(win);
-    wrefresh(win);
-
-    return res;
 }

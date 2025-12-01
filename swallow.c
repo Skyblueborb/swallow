@@ -147,6 +147,55 @@ static void run_taxi_animation(Game* game, entity_t* taxi, int target_x, int tar
     remove_sprite(game, taxi);
 }
 
+void init_swallow(Game* game, Swallow* swallow) {
+    entity_t* s = &swallow->ent;
+
+    swallow->hp = 100;
+    s->width = 3;
+    s->height = 3;
+    s->x = game->main_win.cols / 2;
+    s->y = game->main_win.rows / 2;
+    s->speed = 1;
+    s->direction = DIR_RIGHT;
+    s->dx = s->speed;
+    s->dy = 0;
+    s->color = C_GREEN_5;
+    s->sprites[DIR_UP] =
+            " ^ "
+            "/o\\"
+            ".Y.";
+    s->sprites[DIR_DOWN] =
+            "_w_"
+            "\\o/"
+            " v ";
+    s->sprites[DIR_LEFT] =
+            " /."
+            "<o="
+            " \\.";
+    s->sprites[DIR_RIGHT] =
+            ".\\ "
+            "=o>"
+            "./ ";
+    s->anim_frame = 0;
+    s->anim_timer = 0;
+    s->anim_sprites[DIR_UP] =
+            " ^ "
+            "^o^"
+            ".Y.";
+    s->anim_sprites[DIR_DOWN] =
+            "_w_"
+            "vov"
+            " v ";
+    s->anim_sprites[DIR_LEFT] =
+            " --"
+            "<o="
+            " --";
+    s->anim_sprites[DIR_RIGHT] =
+            "-- "
+            "=o>"
+            "-- ";
+}
+
 void call_albatross_taxi(Game* game) {
     if (game->albatross_cooldown > 0) return;
 

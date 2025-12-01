@@ -1,13 +1,15 @@
 #include <string.h>
 #include <unistd.h>
-#include "conf.h"
 #include "graphics.h"
 #include "ranking.h"
 #include "star.h"
 #include "types.h"
 #include "utils.h"
+#include "game.h"
 
-static void show_high_scores(Game* game, int row_start) {
+#define MENU_STAR_AMOUNT 5
+
+void show_high_scores(Game* game, int row_start) {
     WINDOW* win = game->main_win.window;
     RankingNode* scores = load_rankings();
     RankingNode* current = scores;
@@ -48,7 +50,7 @@ static void show_high_scores(Game* game, int row_start) {
 }
 
 static void draw_menu_stars(Game* game, WINDOW* win) {
-    if ((rand() % 5) == 0) {
+    if ((rand() % MENU_STAR_AMOUNT) == 0) {
         spawn_star(game);
     }
 
@@ -167,57 +169,107 @@ MenuOption show_start_menu(Game* game) {
     return (MenuOption)selection;
 }
 
-static void start_game(Game* game) {
-    char* level_path = select_level(game);
-    free_config(&game->config);
-    game->config = read_config(level_path);
-    free(level_path);
+void get_username(Game* game) {
+    char buffer[50] = {0};
+    WINDOW* win = game->main_win.window;
+    int rows = game->main_win.rows;
+    int cols = game->main_win.cols;
 
-    delwin(game->main_win.window);
-    delwin(game->status_win.window);
-    setup_windows(&game->main_win, &game->status_win, &game->config);
+    int center_y = rows / 2 - 10;
+    int center_x = (cols - 16) / 2;
 
-    srand(game->config.seed);
-    init_occupancy_map(game);
+    wattron(win, COLOR_PAIR(C_GREY_1));
+    box(win, 0, 0);
+    wattroff(win, COLOR_PAIR(C_GREY_1));
+    mvwprintw(win, center_y, center_x, "Enter Username: ");
+    wmove(win, center_y + 1, center_x);
+    wrefresh(win);
 
-    game->running = 1;
-    game->game_speed = 3;
-    game->time_left = game->config.timer;
-    game->score = 0.f;
+    nodelay(win, FALSE);
+    echo();
+    curs_set(1);
 
-    if (game->entities.swallow == NULL) {
-        game->entities.swallow = malloc(sizeof(Swallow));
-        if (!game->entities.swallow) exit(1);
+    wgetnstr(win, buffer, 49);
+
+    noecho();
+    curs_set(0);
+    nodelay(win, TRUE);
+
+    strip_newline(buffer);
+
+    if (strlen(buffer) == 0) {
+        strcpy(buffer, "Player");
     }
-    init_swallow(game, game->entities.swallow);
 
-    while (game->running) {
-        game_loop(game);
+    char* new_ptr = realloc(game->username, strlen(buffer) + 1);
+    if (new_ptr) {
+        game->username = new_ptr;
+        strcpy(game->username, buffer);
+    } else {
+        exit(1);
     }
 
-    save_ranking(game);
-
-    free_hunters(game);
-    free_stars(game);
-    free_occupancy_map(game);
+    wclear(win);
+    wrefresh(win);
 }
 
-static void game_over(Game* game) {
-    setup_menu_window(&game->main_win);
+char* select_level(Game* game) {
+    char** files = NULL;
+    int count = load_levels(&files);
+
+    if (count == 0) {
+        if (files) free(files);
+        return strdup("config.txt");
+    }
+
+    WINDOW* win = game->main_win.window;
+    int sel = 0, c, cx = (game->main_win.cols - 20) / 2;
+
     nodelay(game->main_win.window, FALSE);
-    draw_game_over(game, game->main_win.cols / 2, 1);
-    show_high_scores(game, 10);
-    flushinp();
-    usleep(50000);
-    wgetch(game->main_win.window);
+    keypad(win, TRUE);
+
+    while (1) {
+        wclear(win);
+        wattron(win, COLOR_PAIR(C_GREY_1));
+        box(win, 0, 0);
+        wattroff(win, COLOR_PAIR(C_GREY_1));
+        mvwprintw(win, 2, cx, "SELECT LEVEL:");
+
+        for (int i = 0; i < count; i++) {
+            if (i == sel) wattron(win, A_REVERSE);
+            mvwprintw(win, 4 + i, cx, "%s", files[i]);
+            if (i == sel) wattroff(win, A_REVERSE);
+        }
+        wrefresh(win);
+
+        c = wgetch(win);
+        if (c == KEY_UP)
+            sel = (sel - 1 + count) % count;
+        else if (c == KEY_DOWN)
+            sel = (sel + 1) % count;
+        else if (c == '\n')
+            break;
+    }
+
+    char* res;
+    asprintf(&res, "levels/%s", files[sel]);
+
+    for (int i = 0; i < count; i++) free(files[i]);
+    free(files);
+
     nodelay(game->main_win.window, TRUE);
+    keypad(win, FALSE);
+    wclear(win);
+    wrefresh(win);
+
+    return res;
 }
 
-void menu_loop(Game* game, MenuOption choice) {
+void handle_menu_choice(Game* game, MenuOption choice) {
     switch (choice) {
         case MENU_START_GAME:
             start_game(game);
-            game_over(game);
+            end_game(game);
             break;
         case MENU_HIGH_SCORES:
             show_high_scores(game, 1);

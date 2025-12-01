@@ -79,8 +79,8 @@ static Hunter* init_hunter_data(Game* game, int template_idx) {
 }
 
 void spawn_hunter(Game* game) {
-    int t_idx = rand() % 5;
-    direction_t dir = (direction_t)(rand() % 4);
+    int t_idx = rand() % game->config.hunter_templates_amount;
+    direction_t dir = (direction_t)(rand() % NUM_DIRECTIONS);
 
     Hunter* new_hunter = init_hunter_data(game, t_idx);
     if (!new_hunter) return;
