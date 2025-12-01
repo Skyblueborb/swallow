@@ -42,6 +42,8 @@ static const ConfigMapEntry* get_global_key_map(int* count) {
             {"score_stars_weight", offsetof(conf_t, score_stars_weight), TYPE_FLOAT},
             {"score_life_weight", offsetof(conf_t, score_life_weight), TYPE_FLOAT},
             {"albatross_cooldown", offsetof(conf_t, albatross_cooldown), TYPE_FLOAT},
+            {"hunter_spawn_escalation", offsetof(conf_t, hunter_spawn_escalation), TYPE_FLOAT},
+            {"hunter_bounce_escalation", offsetof(conf_t, hunter_bounce_escalation), TYPE_FLOAT}
     };
     *count = sizeof(map) / sizeof(map[0]);
     return map;

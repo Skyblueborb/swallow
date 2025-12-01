@@ -1,6 +1,5 @@
 #include <unistd.h>
 #include <ctype.h>
-#include <math.h>
 
 #include "types.h"
 
@@ -70,7 +69,7 @@ static void handle_hunter_spawner(Game* game) {
     float base_hunter_threshold = game->config.hunter_spawn * 10;
 
     float elapsed = game->config.timer - game->time_left;
-    float reduction_factor = 1.0f - ((elapsed / 5.0f) * 0.05f);
+    float reduction_factor = 1.0f - ((elapsed / HUNTER_ESCALATION_FREQUENCY) * game->config.hunter_spawn_escalation);
 
     if (reduction_factor < 0.2f) reduction_factor = 0.2f;
 

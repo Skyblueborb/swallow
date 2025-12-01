@@ -86,7 +86,9 @@ void spawn_hunter(Game* game) {
     if (!new_hunter) return;
 
     float elapsed = game->config.timer - game->time_left;
-    int bonus_bounces = (int)(elapsed / 10.0f);
+    int bonus_bounces;
+    if(game->config.hunter_bounce_escalation > 0)
+        bonus_bounces = (int)(elapsed / game->config.hunter_bounce_escalation);
     new_hunter->bounces += bonus_bounces;
 
     get_spawn_coordinates(game, &new_hunter->ent, dir);
@@ -162,7 +164,7 @@ static int handle_hunter_logic(Hunter* h, Swallow* s) {
         case HUNTER_IDLE:
             if (h->dash_cooldown <= 0 && !check_intercept_course(&h->ent, &s->ent)) {
                 h->state = HUNTER_PAUSED;
-                h->state_timer = 30;
+                h->state_timer = HUNTER_IDLE_TICKS;
             }
             break;
 
@@ -175,7 +177,7 @@ static int handle_hunter_logic(Hunter* h, Swallow* s) {
 
                 aim_at_target(&h->ent, &s->ent);
 
-                h->dash_cooldown = 100;
+                h->dash_cooldown = HUNTER_DASH_COOLDOWN_TICKS;
             }
             return 1;
 

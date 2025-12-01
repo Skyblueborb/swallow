@@ -13,6 +13,11 @@
 #define ASCII_WIN_LOOSE_LINES 8
 #define ASCII_HIGH_SCORE_LINES 4
 
+#define HUNTER_IDLE_TICKS 30
+#define HUNTER_DASH_COOLDOWN_TICKS 100
+
+#define HUNTER_ESCALATION_FREQUENCY 5.0f
+
 typedef struct {
     WINDOW* window;
     int x, y, rows, cols;
@@ -109,6 +114,10 @@ typedef struct {
     int window_height;
     int window_width;
     int star_quota;
+    int min_speed;
+    int max_speed;
+    int seed;
+    int hunter_templates_amount;
     float timer;
     float star_spawn;
     float hunter_spawn;
@@ -116,10 +125,8 @@ typedef struct {
     float score_stars_weight;
     float score_life_weight;
     float albatross_cooldown;
-    int min_speed;
-    int max_speed;
-    int seed;
-    int hunter_templates_amount;
+    float hunter_spawn_escalation;
+    float hunter_bounce_escalation;
     HunterTypes *hunter_templates;
 } conf_t;
 
