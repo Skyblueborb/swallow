@@ -4,8 +4,8 @@
 #include "types.h"
 #include "utils.h"
 
-#include "menu.h"
 #include "hunter.h"
+#include "menu.h"
 #include "star.h"
 
 int main() {

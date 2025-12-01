@@ -1,18 +1,18 @@
-#include <unistd.h>
 #include <ctype.h>
+#include <unistd.h>
 
 #include "types.h"
 
-#include "physics.h"
-#include "entity.h"
-#include "utils.h"
 #include "conf.h"
-#include "ranking.h"
-#include "menu.h"
+#include "entity.h"
 #include "graphics.h"
 #include "hunter.h"
+#include "menu.h"
+#include "physics.h"
+#include "ranking.h"
 #include "star.h"
 #include "swallow.h"
+#include "utils.h"
 
 static void handle_game_input(Game* game, entity_t* swallow) {
     int ch = tolower(getch());
@@ -69,7 +69,8 @@ static void handle_hunter_spawner(Game* game) {
     float base_hunter_threshold = game->config.hunter_spawn * 10;
 
     float elapsed = game->config.timer - game->time_left;
-    float reduction_factor = 1.0f - ((elapsed / HUNTER_ESCALATION_FREQUENCY) * game->config.hunter_spawn_escalation);
+    float reduction_factor =
+            1.0f - ((elapsed / HUNTER_ESCALATION_FREQUENCY) * game->config.hunter_spawn_escalation);
 
     if (reduction_factor < 0.2f) reduction_factor = 0.2f;
 
@@ -83,7 +84,7 @@ static void handle_hunter_spawner(Game* game) {
     }
 }
 
-static int calculate_score(Game *game) {
+static int calculate_score(Game* game) {
     float score = 0;
     score += game->stars_collected * game->config.score_stars_weight;
     score += game->time_left * game->config.score_time_weight;
@@ -124,7 +125,6 @@ static void reset_game_state(Game* game) {
     if (game->entities.hunters != NULL) free_hunters(game);
     if (game->entities.stars != NULL) free_stars(game);
 }
-
 
 void game_loop(Game* game) {
     if (game->time_left == game->config.timer) {

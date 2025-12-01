@@ -1,11 +1,11 @@
 #include <string.h>
 #include <unistd.h>
+#include "game.h"
 #include "graphics.h"
 #include "ranking.h"
 #include "star.h"
 #include "types.h"
 #include "utils.h"
-#include "game.h"
 
 #define MENU_STAR_AMOUNT 5
 
