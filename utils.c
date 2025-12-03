@@ -127,6 +127,7 @@ void free_occupancy_map(Game* game) {
             free(game->occupancy_map[y]);
         }
         free(game->occupancy_map);
+        game->occupancy_map = NULL;
     }
 }
 
@@ -134,7 +135,7 @@ void init_occupancy_map(Game* game) {
     int rows = game->main_win.rows;
     int cols = game->main_win.cols;
 
-    game->occupancy_map = malloc(rows * sizeof(char*));
+    game->occupancy_map = calloc(rows, sizeof(char*));
 
     if (game->occupancy_map == NULL) {
         endwin();
