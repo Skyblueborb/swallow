@@ -1,12 +1,22 @@
-#include "conf.h"
 #include <ctype.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#include "conf.h"
 #include "types.h"
 #include "utils.h"
 
+/**
+ * get_*_map()
+ * @count: pointer to hold the amount of entries in a map.
+ *
+ * These maps are used for easy generic parsing of values in parse_values().
+ *
+ * RETURNS
+ * Pointer to static const array containing the map data.
+ */
 static const ColorNameEntry* get_color_map(int* count) {
     static const ColorNameEntry map[] = {
             {"default", PAIR_DEFAULT}, {"player", PAIR_PLAYER},  {"red_1", C_RED_1},
@@ -61,7 +71,21 @@ static const ConfigMapEntry* get_hunter_key_map(int* count) {
     return map;
 }
 
-static void parse_sprite(conf_t* config, int hunter_idx, const char* key, const char* value) {
+/**
+ * parse_sprite - parses and assigns sprite data to a hunter template
+ * @config: pointer to the main config struct
+ * @hunter_idx: index of the current hunter template
+ * @key: configuration key string (e.g., "sprite_up")
+ * @value: the sprite ASCII string
+ *
+ * This function allocates memory for sprites if not already done (based on
+ * width/height), determines the direction based on the key suffix (u/d/l/r),
+ * and copies the value into the appropriate slot.
+ *
+ * RETURNS
+ * Void.
+ */
+static void parse_sprite(conf_t* config, const int hunter_idx, const char* key, const char* value) {
     if (hunter_idx < 0 || !config->hunter_templates) return;
     HunterTypes* hunter = &config->hunter_templates[hunter_idx];
     if (hunter->width <= 0 || hunter->height <= 0) return;
@@ -74,6 +98,9 @@ static void parse_sprite(conf_t* config, int hunter_idx, const char* key, const 
     }
 
     int dir = -1;
+    // Seventh char always contains the direction:
+    // sprite_up
+    //        ^
     switch (key[7]) {
         case 'u':
             dir = DIR_UP;
@@ -95,19 +122,42 @@ static void parse_sprite(conf_t* config, int hunter_idx, const char* key, const 
     }
 }
 
-static int parse_color_name(const char* value) {
+/**
+ * parse_color_name - converts a color string to an enum value
+ * @value: string representation of the color (e.g., "red_5")
+ *
+ * Searches the static color map for a matching name.
+ *
+ * RETURNS
+ * The corresponding integer color pair ID, or PAIR_DEFAULT if not found.
+ */
+static ColorPair parse_color_name(const char* value) {
     int count;
     const ColorNameEntry* map = get_color_map(&count);
 
     for (int i = 0; i < count; i++) {
         if (strcmp(value, map[i].name) == 0) {
-            return (int)map[i].value;
+            return map[i].value;
         }
     }
-    return (int)PAIR_DEFAULT;
+    return PAIR_DEFAULT;
 }
 
-static void parse_values(conf_t* config, int hunter_idx, const char* key, const char* value) {
+/**
+ * parse_values - parses generic key-value pairs
+ * @config: pointer to the main configuration struct
+ * @hunter_idx: index of the current hunter template
+ * @key: key from the config file
+ * @value: corresponding value from the config file
+ *
+ * Deletages parsing for special types such as sprites and colors.
+ * For other regular keys, it looks up the target member offset and type in the appropriate map,
+ * converts the string value, and writes it to the configuration struct.
+ *
+ * RETURNS
+ * Void.
+ */
+static void parse_values(conf_t* config, const int hunter_idx, const char* key, const char* value) {
     void* base_ptr;
     const ConfigMapEntry* map;
     int count;
@@ -133,12 +183,21 @@ static void parse_values(conf_t* config, int hunter_idx, const char* key, const 
             } else if (map[i].type == TYPE_FLOAT) {
                 *(float*)target = atof(value);
             } else if (map[i].type == TYPE_COLOR) {
-                *(int*)target = parse_color_name(value);
+                *(ColorPair*)target = parse_color_name(value);
             }
         }
     }
 }
 
+/**
+ * proccess_config_line - splits config line into key/value pairs
+ * @line: entire line read from the config file
+ * @config: pointer to the main configuration struct
+ * @hunter_idx: index of the current hunter template
+ *
+ * RETURNS
+ * Void.
+ */
 static void process_config_line(char* line, conf_t* config, int* hunter_idx) {
     char* key = strtok(line, " \t");
     if (!key || key[0] == '#' || key[0] == '\0') return;
@@ -165,7 +224,7 @@ static void process_config_line(char* line, conf_t* config, int* hunter_idx) {
     }
 }
 
-conf_t read_config(char* filename) {
+conf_t read_config(const char* filename) {
     conf_t config = {0};
     FILE* file = fopen(filename, "r");
     if (!file) {
@@ -173,8 +232,11 @@ conf_t read_config(char* filename) {
         return config;
     }
 
-    char line[256] = {0};
+    // Hunter template initially is -1.
+    // When a `hunter_template` is detected we stop looking
+    // for global keys and we parse only hunter templates.
     int hunter_index = -1;
+    char line[256] = {0};
 
     while (fgets(line, sizeof(line), file)) {
         strip_newline(line);
