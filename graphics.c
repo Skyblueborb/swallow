@@ -78,8 +78,8 @@ void draw_main(Game* game) {
     wnoutrefresh(win);
 }
 
-void draw_ascii_art(const Game* game, const int center_x, const int art_start_y,
-                    const char** ascii_art, const int art_lines, const ColorPair color) {
+void draw_ascii_art(Game* game, const int center_x, const int art_start_y, const char** ascii_art,
+                    const int art_lines, const ColorPair color) {
     WINDOW* win = game->main_win.window;
 
     wattron(win, COLOR_PAIR(color));

@@ -6,4 +6,4 @@
 void start_game(Game* game);
 void end_game(Game* game);
 
-#endif // GAME_H
+#endif  // GAME_H

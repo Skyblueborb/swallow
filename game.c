@@ -52,11 +52,11 @@ static void handle_game_input(Game* game, entity_t* swallow) {
 }
 
 static void handle_star_movement(Game* game) {
+    game->star_move_tick++;
     if (game->star_move_tick == STAR_MOVE_TICKS) {
-        game->star_move_tick = -1;
+        game->star_move_tick = 0;
         move_stars(game);
     }
-    game->star_move_tick++;
 }
 
 static void handle_star_spawner(Game* game) {

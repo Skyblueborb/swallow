@@ -7,10 +7,10 @@ void aim_at_target(entity_t* source, const entity_t* target);
 int check_intercept_course(const entity_t* h, const entity_t* s);
 
 collision_t process_entity_tick(Game* game, entity_t* ent, char representation);
-void remove_entity(Game *game, entity_t *ent);
+void remove_entity(Game* game, entity_t* ent);
 
 void* remove_generic_node(Game* game, void** head_ref, void* current, void* prev,
-                                 size_t next_offset, size_t ent_offset);
+                          const size_t next_offset, const size_t ent_offset);
 void free_generic_list(Game* game, void* head, size_t next_offset, size_t ent_offset);
 
-#endif // ENTITY_H
+#endif  // ENTITY_H

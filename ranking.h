@@ -4,7 +4,7 @@
 #include "types.h"
 
 RankingNode* load_rankings();
-void save_ranking(Game *game);
-void free_rankings(RankingNode *head);
+void save_ranking(Game* game);
+void free_rankings(RankingNode* head);
 
-#endif // RANKING_H
+#endif  // RANKING_H

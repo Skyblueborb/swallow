@@ -2,8 +2,8 @@
 #define TYPES_H
 
 #include <curses.h>
-#include <stdlib.h>
 #include <inttypes.h>
+#include <stdlib.h>
 
 #define MAX_SAFE_ZONE_ATTEMPTS 50
 
@@ -30,44 +30,50 @@ typedef struct {
     int x, y, rows, cols;
 } WIN;
 
-typedef enum {
-    DIR_UP,
-    DIR_DOWN,
-    DIR_LEFT,
-    DIR_RIGHT,
-    NUM_DIRECTIONS
-} direction_t;
+typedef enum { DIR_UP, DIR_DOWN, DIR_LEFT, DIR_RIGHT, NUM_DIRECTIONS } direction_t;
 
-typedef enum {
-    UP,
-    DOWN
-} increment_t;
+typedef enum { UP, DOWN } increment_t;
 
-typedef enum {
-    WALL,
-    HUNTER,
-    SWALLOW,
-    STAR,
-    EMPTY
-} collision_t;
+typedef enum { WALL, HUNTER, SWALLOW, STAR, EMPTY } collision_t;
 
-typedef enum {
-    UNKNOWN,
-    WINNER,
-    LOSER
-} result_t;
+typedef enum { UNKNOWN, WINNER, LOSER } result_t;
 
 typedef enum {
     PAIR_DEFAULT = 1,
     PAIR_PLAYER,
 
-    C_RED_1, C_RED_2, C_RED_3, C_RED_4, C_RED_5,
-    C_GREEN_1, C_GREEN_2, C_GREEN_3, C_GREEN_4, C_GREEN_5,
-    C_BLUE_1, C_BLUE_2, C_BLUE_3, C_BLUE_4, C_BLUE_5,
-    C_YELLOW_1, C_YELLOW_2, C_YELLOW_3, C_YELLOW_4, C_YELLOW_5,
-    C_PURPLE_1, C_PURPLE_2, C_PURPLE_3, C_PURPLE_4, C_PURPLE_5,
-    C_CYAN_1, C_CYAN_2, C_CYAN_3, C_CYAN_4, C_CYAN_5,
-    C_GREY_1, C_GREY_2
+    C_RED_1,
+    C_RED_2,
+    C_RED_3,
+    C_RED_4,
+    C_RED_5,
+    C_GREEN_1,
+    C_GREEN_2,
+    C_GREEN_3,
+    C_GREEN_4,
+    C_GREEN_5,
+    C_BLUE_1,
+    C_BLUE_2,
+    C_BLUE_3,
+    C_BLUE_4,
+    C_BLUE_5,
+    C_YELLOW_1,
+    C_YELLOW_2,
+    C_YELLOW_3,
+    C_YELLOW_4,
+    C_YELLOW_5,
+    C_PURPLE_1,
+    C_PURPLE_2,
+    C_PURPLE_3,
+    C_PURPLE_4,
+    C_PURPLE_5,
+    C_CYAN_1,
+    C_CYAN_2,
+    C_CYAN_3,
+    C_CYAN_4,
+    C_CYAN_5,
+    C_GREY_1,
+    C_GREY_2
 } ColorPair;
 
 // Entity types
@@ -91,15 +97,11 @@ typedef struct {
 
 typedef struct Star {
     entity_t ent;
-    struct Star *next;
+    struct Star* next;
 } Star;
 
 // Hunter Types
-typedef enum {
-    HUNTER_IDLE,
-    HUNTER_PAUSED,
-    HUNTER_DASHING
-} HunterState;
+typedef enum { HUNTER_IDLE, HUNTER_PAUSED, HUNTER_DASHING } HunterState;
 
 typedef struct Hunter {
     entity_t ent;
@@ -109,7 +111,7 @@ typedef struct Hunter {
     int state_timer;
     int base_speed;
     int dash_cooldown;
-    struct Hunter *next;
+    struct Hunter* next;
 } Hunter;
 
 typedef struct HunterTypes {
@@ -140,18 +142,13 @@ typedef struct {
     float albatross_cooldown;
     float hunter_spawn_escalation;
     float hunter_bounce_escalation;
-    HunterTypes *hunter_templates;
+    HunterTypes* hunter_templates;
 } conf_t;
 
-typedef enum {
-    TYPE_INT,
-    TYPE_FLOAT,
-    TYPE_STRING,
-    TYPE_COLOR
-} ConfigType;
+typedef enum { TYPE_INT, TYPE_FLOAT, TYPE_STRING, TYPE_COLOR } ConfigType;
 
 typedef struct {
-    const char *key_name;
+    const char* key_name;
     size_t offset;
     ConfigType type;
 } ConfigMapEntry;
@@ -162,9 +159,9 @@ typedef struct {
 } ColorNameEntry;
 
 typedef struct GameEntities {
-    Swallow *swallow;
-    Hunter *hunters;
-    Star *stars;
+    Swallow* swallow;
+    Hunter* hunters;
+    Star* stars;
 } GameEntities;
 
 typedef struct {
@@ -174,8 +171,8 @@ typedef struct {
     char running;
     char menu_running;
     char result;
-    char **occupancy_map;
-    char *username;
+    char** occupancy_map;
+    char* username;
     float time_left;
     int game_speed;
     int stars_collected;
@@ -191,14 +188,9 @@ typedef struct {
 typedef struct RankingNode {
     int score;
     char username[MAX_USERNAME_LENGTH];
-    struct RankingNode *next;
+    struct RankingNode* next;
 } RankingNode;
 
-typedef enum {
-    MENU_START_GAME,
-    MENU_HIGH_SCORES,
-    MENU_USERNAME,
-    MENU_EXIT
-} MenuOption;
+typedef enum { MENU_START_GAME, MENU_HIGH_SCORES, MENU_USERNAME, MENU_EXIT } MenuOption;
 
-#endif // TYPES_H
+#endif  // TYPES_H

@@ -9,4 +9,4 @@ void move_stars(Game* game);
 void spawn_star(Game* game);
 void free_stars(Game* game);
 
-#endif // STAR_H
+#endif  // STAR_H

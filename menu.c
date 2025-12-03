@@ -263,7 +263,7 @@ char* select_level(Game* game) {
     return res;
 }
 
-void handle_menu_choice(Game* game, MenuOption choice) {
+void handle_menu_choice(Game* game, const MenuOption choice) {
     switch (choice) {
         case MENU_START_GAME:
             start_game(game);
