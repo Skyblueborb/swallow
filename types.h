@@ -6,8 +6,6 @@
 #include <inttypes.h>
 
 #define MAX_SAFE_ZONE_ATTEMPTS 50
-#define WINNER 1
-#define LOSER 0
 
 #define ASCII_LOGO_LINES 6
 #define ASCII_WIN_LOOSE_LINES 8
@@ -17,6 +15,8 @@
 #define HUNTER_DASH_COOLDOWN_TICKS 100
 
 #define HUNTER_ESCALATION_FREQUENCY 5.0f
+
+#define MAX_USERNAME_LENGTH 50
 
 typedef struct {
     WINDOW* window;
@@ -43,6 +43,12 @@ typedef enum {
     STAR,
     EMPTY
 } collision_t;
+
+typedef enum {
+    UNKNOWN,
+    WINNER,
+    LOSER
+} result_t;
 
 typedef enum {
     PAIR_DEFAULT = 1,
@@ -177,12 +183,12 @@ typedef struct {
 
 typedef struct RankingNode {
     int score;
-    char username[50];
+    char username[MAX_USERNAME_LENGTH];
     struct RankingNode *next;
 } RankingNode;
 
 typedef enum {
-    MENU_START_GAME = 0,
+    MENU_START_GAME,
     MENU_HIGH_SCORES,
     MENU_USERNAME,
     MENU_EXIT

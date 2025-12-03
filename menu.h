@@ -3,7 +3,7 @@
 
 #include "types.h"
 
-void show_high_scores(Game* game, int row_start);
+void show_high_scores(Game* game, const int row_start);
 MenuOption show_start_menu(Game *game);
 void get_username(Game *game);
 char* select_level(Game* game);

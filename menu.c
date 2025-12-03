@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <string.h>
 #include <unistd.h>
 #include "game.h"
@@ -9,15 +10,15 @@
 
 #define MENU_STAR_AMOUNT 5
 
-void show_high_scores(Game* game, int row_start) {
+#define CENTER_Y_OFFSET 10
+
+void show_high_scores(Game* game, const int row_start) {
     WINDOW* win = game->main_win.window;
     RankingNode* scores = load_rankings();
     RankingNode* current = scores;
     nodelay(win, FALSE);
 
-    wattron(win, COLOR_PAIR(C_GREY_1));
-    box(win, 0, 0);
-    wattroff(win, COLOR_PAIR(C_GREY_1));
+    draw_main(game);
     int center_x = game->main_win.cols / 2;
     draw_high_scores(game, center_x, row_start);
 
@@ -60,7 +61,7 @@ static void draw_menu_stars(Game* game, WINDOW* win) {
     wattron(win, A_BOLD);
 
     while (curr != NULL) {
-        draw_sprite(game, &curr->ent);
+        remove_sprite(game, &curr->ent);
 
         curr->ent.y += curr->ent.dy;
 
@@ -74,6 +75,7 @@ static void draw_menu_stars(Game* game, WINDOW* win) {
             curr = curr->next;
             free(to_free);
         } else {
+            draw_sprite(game, &curr->ent);
             prev = curr;
             curr = curr->next;
         }
@@ -92,8 +94,8 @@ static void cleanup_menu_stars(Game* game) {
     game->entities.stars = NULL;
 }
 
-static void draw_menu_options(WINDOW* win, int selection, int num_options, const char** options,
-                              int start_y, int center_x) {
+static void draw_menu_options(WINDOW* win, const int selection, const int num_options, const char** options,
+                              const int start_y, const int center_x) {
     for (int i = 0; i < num_options; i++) {
         if (i == selection) {
             wattron(win, A_REVERSE | A_BOLD);
@@ -105,7 +107,7 @@ static void draw_menu_options(WINDOW* win, int selection, int num_options, const
     }
 }
 
-static int handle_menu_input(WINDOW* win, int* selection, int num_options) {
+static int handle_menu_input(WINDOW* win, int* const selection, const int num_options) {
     int c = wgetch(win);
     if (c == ERR) return 0;
 
@@ -133,10 +135,7 @@ MenuOption show_start_menu(Game* game) {
     keypad(win, TRUE);
 
     while (1) {
-        wclear(win);
-        wattron(win, COLOR_PAIR(C_GREY_1));
-        box(win, 0, 0);
-        wattroff(win, COLOR_PAIR(C_GREY_1));
+        draw_main(game);
 
         draw_menu_stars(game, win);
 
@@ -170,17 +169,16 @@ MenuOption show_start_menu(Game* game) {
 }
 
 void get_username(Game* game) {
-    char buffer[50] = {0};
+    char buffer[MAX_USERNAME_LENGTH] = {0};
     WINDOW* win = game->main_win.window;
-    int rows = game->main_win.rows;
-    int cols = game->main_win.cols;
+    const int rows = game->main_win.rows;
+    const int cols = game->main_win.cols;
 
-    int center_y = rows / 2 - 10;
-    int center_x = (cols - 16) / 2;
+    // strlen("Enter Username:") = 16
+    const int center_x = (cols - 16) / 2;
+    const int center_y = rows / 2 - CENTER_Y_OFFSET;
 
-    wattron(win, COLOR_PAIR(C_GREY_1));
-    box(win, 0, 0);
-    wattroff(win, COLOR_PAIR(C_GREY_1));
+    draw_main(game);
     mvwprintw(win, center_y, center_x, "Enter Username: ");
     wmove(win, center_y + 1, center_x);
     wrefresh(win);
@@ -189,7 +187,7 @@ void get_username(Game* game) {
     echo();
     curs_set(1);
 
-    wgetnstr(win, buffer, 49);
+    wgetnstr(win, buffer, MAX_USERNAME_LENGTH - 1);
 
     noecho();
     curs_set(0);
@@ -215,7 +213,7 @@ void get_username(Game* game) {
 
 char* select_level(Game* game) {
     char** files = NULL;
-    int count = load_levels(&files);
+    const int count = load_levels(&files);
 
     if (count == 0) {
         if (files) free(files);

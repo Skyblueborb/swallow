@@ -78,11 +78,9 @@ void draw_main(Game* game) {
     wnoutrefresh(win);
 }
 
-void draw_ascii_art(Game* game, int center_x, int art_start_y, const char** ascii_art,
-                    int art_lines, ColorPair color) {
+void draw_ascii_art(const Game* game, const int center_x, const int art_start_y, const char** ascii_art,
+                    const int art_lines, const ColorPair color) {
     WINDOW* win = game->main_win.window;
-
-    if (art_start_y < 1) art_start_y = 1;
 
     wattron(win, COLOR_PAIR(color));
     for (int i = 0; i < art_lines; i++) {
@@ -95,7 +93,7 @@ void draw_ascii_art(Game* game, int center_x, int art_start_y, const char** asci
     wrefresh(win);
 }
 
-void draw_logo(Game* game, int center_x, int art_start_y) {
+void draw_logo(Game* game, const int center_x, const int art_start_y) {
     const char* logo_art[] = {
             "  _________               .__  .__                    _________ __                    "
             "   ",
@@ -109,11 +107,11 @@ void draw_logo(Game* game, int center_x, int art_start_y) {
             "/____  >",
             "        \\/              \\/                                  \\/           \\/       "
             "    \\/"};
-    int logo_lines = 6;
+    const int logo_lines = sizeof(logo_art) / sizeof(logo_art[0]);
     draw_ascii_art(game, center_x, art_start_y, logo_art, logo_lines, PAIR_PLAYER);
 }
 
-void draw_game_over(Game* game, int center_x, int art_start_y) {
+void draw_game_over(Game* game, const int center_x, const int art_start_y) {
     const char* win_art[] = {
             "          _______                      _______  _        _ ",
             "|\\     /|(  ___  )|\\     /|  |\\     /|(  ___  )( (    /|( )",
@@ -135,23 +133,22 @@ void draw_game_over(Game* game, int center_x, int art_start_y) {
             "   | |   | (___) || (___) |  | (____/\\| (___) |/\\____) || (____/\\  _  _  _ ",
             "   \\_/   (_______)(_______)  (_______/(_______)\\_______)(_______/ (_)(_)(_)"};
 
-    int art_lines = 8;
-
     if (game->result == WINNER) {
+        const int art_lines = sizeof(win_art) / sizeof(win_art[0]);
         draw_ascii_art(game, center_x, art_start_y, win_art, art_lines, C_GREEN_5);
     } else {
+        const int art_lines = sizeof(lose_art) / sizeof(lose_art[0]);
         draw_ascii_art(game, center_x, art_start_y, lose_art, art_lines, C_RED_5);
     }
 }
 
-void draw_high_scores(Game* game, int center_x, int art_start_y) {
+void draw_high_scores(Game* game, const int center_x, const int art_start_y) {
     const char* high_score_art[] = {
             "▗▖ ▗▖▗▄▄▄▖ ▗▄▄▖▗▖ ▗▖     ▗▄▄▖ ▗▄▄▖ ▗▄▖ ▗▄▄▖ ▗▄▄▄▖ ▗▄▄▖   ",
             "▐▌ ▐▌  █  ▐▌   ▐▌ ▐▌    ▐▌   ▐▌   ▐▌ ▐▌▐▌ ▐▌▐▌   ▐▌     ▀",
             "▐▛▀▜▌  █  ▐▌▝▜▌▐▛▀▜▌     ▝▀▚▖▐▌   ▐▌ ▐▌▐▛▀▚▖▐▛▀▀▘ ▝▀▚▖  ▄",
             "▐▌ ▐▌▗▄█▄▖▝▚▄▞▘▐▌ ▐▌    ▗▄▄▞▘▝▚▄▄▖▝▚▄▞▘▐▌ ▐▌▐▙▄▄▖▗▄▄▞▘   ",
     };
-    int art_lines = 4;
-
+    const int art_lines = sizeof(high_score_art) / sizeof(high_score_art[0]);
     draw_ascii_art(game, center_x, art_start_y, high_score_art, art_lines, C_YELLOW_5);
 }

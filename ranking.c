@@ -5,7 +5,7 @@
 
 typedef struct {
     int score;
-    char username[50];
+    char username[MAX_USERNAME_LENGTH];
 } SortEntry;
 
 static int compare_scores(const void* a, const void* b) {
@@ -22,14 +22,15 @@ RankingNode* load_rankings() {
     RankingNode* tail = NULL;
 
     int score;
-    char name[50];
+    char name[MAX_USERNAME_LENGTH];
 
     while (fscanf(file, "%d %49s", &score, name) == 2) {
         RankingNode* new_node = malloc(sizeof(RankingNode));
         if (!new_node) break;
 
         new_node->score = score;
-        strcpy(new_node->username, name);
+        strncpy(new_node->username, name, MAX_USERNAME_LENGTH - 1);
+        new_node->username[MAX_USERNAME_LENGTH - 1] = '\0';
         new_node->next = NULL;
 
         if (head == NULL) {

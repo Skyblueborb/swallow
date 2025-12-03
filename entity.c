@@ -8,8 +8,20 @@
 #include "physics.h"
 #include "types.h"
 
-#define HUNTER_LOOKAHEAD_TICKS 10
+#define LOOKAHEAD_TICKS 10
 
+/**
+ * aim_at_target - Sets source velocity to move towards target
+ * @source: The entity to modify (e.g., Hunter)
+ * @target: The destination entity (e.g., Swallow)
+ *
+ * Calculates independent X and Y velocities to allow diagonal movement.
+ * Also updates the 'direction' field based on the dominant axis for
+ * correct sprite selection.
+ *
+ * RETURNS
+ * Void.
+ */
 void aim_at_target(entity_t* source, const entity_t* target) {
     int dx = target->x - source->x;
     int dy = target->y - source->y;
@@ -35,9 +47,20 @@ void aim_at_target(entity_t* source, const entity_t* target) {
     }
 }
 
+/**
+ * check_intercept_course - Predicts if entity is closing distance
+ * @h: The hunting entity
+ * @s: The target entity
+ *
+ * Simulates movement LOOKAHEAD_TICKS into the future based on current velocity.
+ *
+ * RETURNS
+ * 1 - entities are going closer to each other
+ * 0 - entities are moving away
+ */
 int check_intercept_course(const entity_t* h, const entity_t* s) {
-    int future_h_x = h->x + (h->dx * HUNTER_LOOKAHEAD_TICKS);
-    int future_h_y = h->y + (h->dy * HUNTER_LOOKAHEAD_TICKS);
+    int future_h_x = h->x + (h->dx * LOOKAHEAD_TICKS);
+    int future_h_y = h->y + (h->dy * LOOKAHEAD_TICKS);
 
     int current_dist = abs(s->x - h->x) + abs(s->y - h->y);
     int future_dist = abs(s->x - future_h_x) + abs(s->y - future_h_y);
@@ -45,6 +68,15 @@ int check_intercept_course(const entity_t* h, const entity_t* s) {
     return (future_dist < current_dist);
 }
 
+/**
+ * process_entity_tick - Actions every entity should do each tick.
+ * @game: Main game struct
+ * @ent: The entity to update
+ * @representation: Map character to set (e.g. 'H')
+ *
+ * RETURNS
+ * Collision result (e.g. EMPTY, WALL)
+ */
 collision_t process_entity_tick(Game* game, entity_t* ent, char representation) {
     remove_entity(game, ent);
     collision_t ret = attempt_move_entity(game, ent);

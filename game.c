@@ -1,8 +1,6 @@
 #include <ctype.h>
 #include <unistd.h>
 
-#include "types.h"
-
 #include "conf.h"
 #include "entity.h"
 #include "graphics.h"
@@ -12,7 +10,14 @@
 #include "ranking.h"
 #include "star.h"
 #include "swallow.h"
+#include "types.h"
 #include "utils.h"
+
+#define GAME_OVER_INPUT_BLOCK 2000000
+
+#define STAR_MOVE_TICKS 4
+
+#define BASE_SPAWNER_MULTIPLIER 10
 
 static void handle_game_input(Game* game, entity_t* swallow) {
     int ch = tolower(getch());
@@ -48,7 +53,7 @@ static void handle_game_input(Game* game, entity_t* swallow) {
 }
 
 static void handle_star_movement(Game* game) {
-    if (game->star_move_tick == 4) {
+    if (game->star_move_tick == STAR_MOVE_TICKS) {
         game->star_move_tick = -1;
         move_stars(game);
     }
@@ -56,7 +61,7 @@ static void handle_star_movement(Game* game) {
 }
 
 static void handle_star_spawner(Game* game) {
-    int star_spawn_threshold = game->config.star_spawn * 10;
+    int star_spawn_threshold = game->config.star_spawn * BASE_SPAWNER_MULTIPLIER;
 
     game->star_spawn_tick++;
     if (game->star_spawn_tick >= star_spawn_threshold) {
@@ -65,6 +70,16 @@ static void handle_star_spawner(Game* game) {
     }
 }
 
+/**
+ * handle_hunter_spawner - Manages hunter generation with difficulty scaling
+ * @game: Main game struct
+ *
+ * Calculates how often a hunter should be spawned based on hunter_spawn_escalation.
+ * Subsequently it spawns the hunter if enough ticks has passed.
+ *
+ * RETURNS
+ * Void.
+ */
 static void handle_hunter_spawner(Game* game) {
     float base_hunter_threshold = game->config.hunter_spawn * 10;
 
@@ -84,33 +99,51 @@ static void handle_hunter_spawner(Game* game) {
     }
 }
 
+/**
+ * calculate_score - Computes the final game score
+ * @game: Main game struct
+ *
+ * Formula: (Stars * Star_Weight + Time * Time_Weight + Life * Life_Weight) * Level_Nr * Result
+ * Weights are defined in the configuration file.
+ *
+ * RETURNS
+ * Calculated score presented as an integer.
+ */
 static int calculate_score(Game* game) {
     float score = 0;
     score += game->stars_collected * game->config.score_stars_weight;
     score += game->time_left * game->config.score_time_weight;
     score += game->entities.swallow->hp * game->config.score_life_weight;
-
-    game->score = score * game->config.level_nr * game->result;
+    if(game->result == WINNER)
+        score *= game->config.level_nr * game->result;
 
     return (int)score;
 }
 
+/**
+ * check_game_over - Verifies win/loss conditions
+ * @game: Main game struct
+ *
+ * Win:stars collected >= star Quota.
+ * Loss: Time runs out or HP drops to 0.
+ *
+ * RETURNS
+ * Void.
+ */
 static void check_game_over(Game* game) {
     if (game->stars_collected >= game->config.star_quota) {
-        game->running = 0;
         game->result = WINNER;
-
-        game->score = calculate_score(game);
-    }
-
-    if (game->time_left <= 0 || game->entities.swallow->hp <= 0) {
-        game->running = 0;
+    } else if (game->time_left <= 0 || game->entities.swallow->hp <= 0) {
         game->result = LOSER;
 
+        // Prevent negative values in status_win
         game->time_left = 0;
         game->entities.swallow->hp = 0;
-        game->score = calculate_score(game);
     }
+
+    if(game->result != UNKNOWN)
+        game->running = 0;
+    game->score = calculate_score(game);
 }
 
 static void reset_game_state(Game* game) {
@@ -120,6 +153,7 @@ static void reset_game_state(Game* game) {
     game->star_flicker_tick = 0;
     game->stars_collected = 0;
     game->albatross_cooldown = 0;
+    game->result = UNKNOWN;
     srand(game->config.seed);
 
     if (game->entities.hunters != NULL) free_hunters(game);
@@ -171,7 +205,7 @@ void start_game(Game* game) {
     init_occupancy_map(game);
 
     game->running = 1;
-    game->game_speed = 3;
+    game->game_speed = game->config.min_speed;
     game->time_left = game->config.timer;
     game->score = 0.f;
 
@@ -198,7 +232,7 @@ void end_game(Game* game) {
     draw_game_over(game, game->main_win.cols / 2, 1);
     show_high_scores(game, 10);
     flushinp();
-    usleep(50000);
+    usleep(GAME_OVER_INPUT_BLOCK);
     wgetch(game->main_win.window);
     nodelay(game->main_win.window, TRUE);
 }

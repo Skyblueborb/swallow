@@ -6,7 +6,7 @@
 #include "physics.h"
 #include "types.h"
 
-static void get_spawn_coordinates(Game* game, entity_t* hunter_ent, direction_t side) {
+static void get_spawn_coordinates(Game* game, entity_t* hunter_ent, const direction_t side) {
     int w = hunter_ent->width;
     int h = hunter_ent->height;
     int max_r = game->main_win.rows - h - 2;
@@ -41,13 +41,13 @@ static void get_spawn_coordinates(Game* game, entity_t* hunter_ent, direction_t 
     hunter_ent->y = y;
 }
 
-static void setup_hunter_physics(Hunter* hun, int x, int y, direction_t dir) {
+static void setup_hunter_physics(Hunter* hun, const int x, const int y, const direction_t dir) {
     hun->ent.x = x;
     hun->ent.y = y;
     change_entity_direction(&hun->ent, dir, hun->ent.speed);
 }
 
-static Hunter* init_hunter_data(Game* game, int template_idx) {
+static Hunter* init_hunter_data(Game* game, const int template_idx) {
     Hunter* hun = malloc(sizeof(Hunter));
     if (!hun) return NULL;
 
@@ -104,7 +104,7 @@ Hunter* remove_hunter(Game* game, Hunter* current, Hunter* prev) {
                                         offsetof(Hunter, next), offsetof(Hunter, ent));
 }
 
-static int resolve_hunter_collision(Game* game, Hunter** curr, Hunter* prev, collision_t ret) {
+static int resolve_hunter_collision(Game* game, Hunter** curr, Hunter* prev, const collision_t ret) {
     Hunter* h = *curr;
     if (ret != EMPTY) {
         h->state = HUNTER_IDLE;
@@ -155,7 +155,7 @@ static int resolve_hunter_collision(Game* game, Hunter** curr, Hunter* prev, col
     return 0;
 }
 
-static int handle_hunter_logic(Hunter* h, Swallow* s) {
+static int handle_hunter_logic(Hunter* h, const Swallow* s) {
     if (h->dash_cooldown > 0) {
         h->dash_cooldown--;
     }

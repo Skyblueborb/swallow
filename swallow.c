@@ -3,6 +3,7 @@
 #include "graphics.h"
 #include "hunter.h"
 #include "physics.h"
+#include "star.h"
 #include "types.h"
 
 #define ANIMATION_TICKS 5
