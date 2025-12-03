@@ -31,12 +31,12 @@ void collect_stars(Game* game) {
 }
 
 static void update_star_color(Game* game, Star* star) {
-    int y = star->ent.y;
-    int height = game->main_win.rows;
+    const int y = star->ent.y;
+    const int height = game->main_win.rows;
 
     if (height == 0) return;
 
-    float star_progress = (float)y / height;
+    const float star_progress = (float)y / height;
 
     if (star_progress < 0.2f) {
         star->ent.color = C_YELLOW_5;
@@ -54,16 +54,16 @@ static void update_star_color(Game* game, Star* star) {
 void move_stars(Game* game) {
     Star* current = game->entities.stars;
     Star* prev = NULL;
-    Swallow* swallow = game->entities.swallow;
+    const Swallow* swallow = game->entities.swallow;
 
     while (current != NULL) {
         update_star_color(game, current);
 
-        int s_top = current->ent.y;
-        int s_bot = current->ent.y + current->ent.height + current->ent.speed;
+        const int s_top = current->ent.y;
+        const int s_bot = current->ent.y + current->ent.height + current->ent.speed;
 
-        int t_top = swallow->ent.y;
-        int t_bot = swallow->ent.y + swallow->ent.height;
+        const int t_top = swallow->ent.y;
+        const int t_bot = swallow->ent.y + swallow->ent.height;
 
         if (s_bot >= t_top && s_top <= t_bot &&
             current->ent.x < swallow->ent.x + swallow->ent.width &&
@@ -73,7 +73,7 @@ void move_stars(Game* game) {
             continue;
         }
 
-        collision_t ret = process_entity_tick(game, &current->ent, STAR);
+        const collision_t ret = process_entity_tick(game, &current->ent, STAR);
 
         if (ret != EMPTY) {
             if (ret == SWALLOW) {
@@ -88,7 +88,7 @@ void move_stars(Game* game) {
 }
 
 void spawn_star(Game* game) {
-    Star* star = malloc(sizeof(Star));
+    Star* star = (Star*)malloc(sizeof(Star));
     if (!star) return;
 
     star->ent.width = 1;

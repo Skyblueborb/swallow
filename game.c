@@ -2,7 +2,6 @@
 #include <unistd.h>
 
 #include "conf.h"
-#include "entity.h"
 #include "graphics.h"
 #include "hunter.h"
 #include "menu.h"
@@ -20,7 +19,7 @@
 #define BASE_SPAWNER_MULTIPLIER 10
 
 static void handle_game_input(Game* game, entity_t* swallow) {
-    int ch = tolower(getch());
+    const int ch = tolower(getch());
 
     if (ch != ERR) {
         switch (ch) {
@@ -61,7 +60,7 @@ static void handle_star_movement(Game* game) {
 }
 
 static void handle_star_spawner(Game* game) {
-    int star_spawn_threshold = game->config.star_spawn * BASE_SPAWNER_MULTIPLIER;
+    const int star_spawn_threshold = game->config.star_spawn * BASE_SPAWNER_MULTIPLIER;
 
     game->star_spawn_tick++;
     if (game->star_spawn_tick >= star_spawn_threshold) {
@@ -81,9 +80,9 @@ static void handle_star_spawner(Game* game) {
  * Void.
  */
 static void handle_hunter_spawner(Game* game) {
-    float base_hunter_threshold = game->config.hunter_spawn * 10;
+    const float base_hunter_threshold = game->config.hunter_spawn * 10;
 
-    float elapsed = game->config.timer - game->time_left;
+    const float elapsed = game->config.timer - game->time_left;
     float reduction_factor =
             1.0f - ((elapsed / HUNTER_ESCALATION_FREQUENCY) * game->config.hunter_spawn_escalation);
 
@@ -114,8 +113,7 @@ static int calculate_score(Game* game) {
     score += game->stars_collected * game->config.score_stars_weight;
     score += game->time_left * game->config.score_time_weight;
     score += game->entities.swallow->hp * game->config.score_life_weight;
-    if(game->result == WINNER)
-        score *= game->config.level_nr * game->result;
+    if (game->result == WINNER) score *= game->config.level_nr * game->result;
 
     return (int)score;
 }
@@ -141,8 +139,7 @@ static void check_game_over(Game* game) {
         game->entities.swallow->hp = 0;
     }
 
-    if(game->result != UNKNOWN)
-        game->running = 0;
+    if (game->result != UNKNOWN) game->running = 0;
     game->score = calculate_score(game);
 }
 
@@ -164,8 +161,8 @@ void game_loop(Game* game) {
     if (game->time_left == game->config.timer) {
         reset_game_state(game);
     }
-    unsigned int sleep_us = 66666 / game->game_speed;
-    float delta_seconds = (float)sleep_us / 1000000.0f;
+    const unsigned int sleep_us = 66666 / game->game_speed;
+    const float delta_seconds = (float)sleep_us / 1000000.0f;
 
     Swallow* swallow = game->entities.swallow;
     handle_game_input(game, &swallow->ent);
@@ -210,7 +207,7 @@ void start_game(Game* game) {
     game->score = 0.f;
 
     if (game->entities.swallow == NULL) {
-        game->entities.swallow = malloc(sizeof(Swallow));
+        game->entities.swallow = (Swallow*)malloc(sizeof(Swallow));
         if (!game->entities.swallow) exit(1);
     }
     init_swallow(game, game->entities.swallow);

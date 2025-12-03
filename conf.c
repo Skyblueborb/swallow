@@ -87,13 +87,13 @@ static const ConfigMapEntry* get_hunter_key_map(int* count) {
  */
 static void parse_sprite(conf_t* config, const int hunter_idx, const char* key, const char* value) {
     if (hunter_idx < 0 || !config->hunter_templates) return;
-    HunterTypes* hunter = &config->hunter_templates[hunter_idx];
+    HunterTypes* const hunter = &config->hunter_templates[hunter_idx];
     if (hunter->width <= 0 || hunter->height <= 0) return;
 
-    size_t size = hunter->width * hunter->height + 1;
+    const size_t size = hunter->width * hunter->height + 1;
     if (hunter->sprites[0] == NULL) {
         for (int i = 0; i < NUM_DIRECTIONS; i++) {
-            hunter->sprites[i] = malloc(size);
+            hunter->sprites[i] = (char*)malloc(size);
         }
     }
 
@@ -199,10 +199,10 @@ static void parse_values(conf_t* config, const int hunter_idx, const char* key, 
  * Void.
  */
 static void process_config_line(char* line, conf_t* config, int* hunter_idx) {
-    char* key = strtok(line, " \t");
+    const char* key = strtok(line, " \t");
     if (!key || key[0] == '#' || key[0] == '\0') return;
 
-    char* value = strtok(NULL, "");
+    const char* value = strtok(NULL, "");
     if (value) {
         while (*value && isspace((unsigned char)*value)) value++;
     } else {
@@ -213,8 +213,8 @@ static void process_config_line(char* line, conf_t* config, int* hunter_idx) {
         (*hunter_idx)++;
         config->hunter_templates_amount = (*hunter_idx) + 1;
 
-        HunterTypes* temp = realloc(config->hunter_templates,
-                                    config->hunter_templates_amount * sizeof(HunterTypes));
+        HunterTypes* const temp = (HunterTypes*)realloc(
+                config->hunter_templates, config->hunter_templates_amount * sizeof(HunterTypes));
         if (!temp) exit(1);
         config->hunter_templates = temp;
 

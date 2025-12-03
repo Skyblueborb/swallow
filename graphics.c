@@ -18,15 +18,15 @@ void draw_sprite(Game* game, entity_t* entity) {
 
     for (int sprite_y = 0; sprite_y < entity->height; sprite_y++) {
         for (int sprite_x = 0; sprite_x < entity->width; sprite_x++) {
-            int screen_y = entity->y + sprite_y;
-            int screen_x = entity->x + sprite_x;
+            const int screen_y = entity->y + sprite_y;
+            const int screen_x = entity->x + sprite_x;
 
             if (screen_y < 0 || screen_y >= game->main_win.rows || screen_x < 0 ||
                 screen_x >= game->main_win.cols) {
                 continue;
             }
 
-            char sprite_char = sprite_grid[sprite_y * entity->width + sprite_x];
+            const char sprite_char = sprite_grid[sprite_y * entity->width + sprite_x];
 
             if (sprite_char != ' ') {
                 mvwaddch(win, screen_y, screen_x, sprite_char);
@@ -44,8 +44,8 @@ void remove_sprite(Game* game, entity_t* entity) {
 
     for (int sprite_y = 0; sprite_y < entity->height; sprite_y++) {
         for (int sprite_x = 0; sprite_x < entity->width; sprite_x++) {
-            int screen_y = entity->y + sprite_y;
-            int screen_x = entity->x + sprite_x;
+            const int screen_y = entity->y + sprite_y;
+            const int screen_x = entity->x + sprite_x;
 
             mvwaddch(win, screen_y, screen_x, ' ');
         }
@@ -78,13 +78,13 @@ void draw_main(Game* game) {
     wnoutrefresh(win);
 }
 
-void draw_ascii_art(const Game* game, const int center_x, const int art_start_y, const char** ascii_art,
-                    const int art_lines, const ColorPair color) {
+void draw_ascii_art(const Game* game, const int center_x, const int art_start_y,
+                    const char** ascii_art, const int art_lines, const ColorPair color) {
     WINDOW* win = game->main_win.window;
 
     wattron(win, COLOR_PAIR(color));
     for (int i = 0; i < art_lines; i++) {
-        int len = mbstowcs(NULL, ascii_art[i], 0);
+        const int len = mbstowcs(NULL, ascii_art[i], 0);
         int x = center_x - (len / 2);
         if (x < 1) x = 1;
         mvwprintw(win, art_start_y + i, x, "%s", ascii_art[i]);

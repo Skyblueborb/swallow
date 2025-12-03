@@ -18,6 +18,13 @@
 
 #define MAX_USERNAME_LENGTH 50
 
+#define MENU_ROWS 32
+#define MENU_COLS 100
+#define MENU_X 0
+#define MENU_Y 0
+
+#define PHYSICS_TOUCHING_TOLERANCE 1
+
 typedef struct {
     WINDOW* window;
     int x, y, rows, cols;

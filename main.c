@@ -21,7 +21,7 @@ int main() {
     game.menu_running = 1;
     while (game.menu_running) {
         setup_menu_window(&game.main_win);
-        MenuOption choice = show_start_menu(&game);
+        const MenuOption choice = show_start_menu(&game);
         handle_menu_choice(&game, choice);
     }
 

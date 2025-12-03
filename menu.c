@@ -19,7 +19,7 @@ void show_high_scores(Game* game, const int row_start) {
     nodelay(win, FALSE);
 
     draw_main(game);
-    int center_x = game->main_win.cols / 2;
+    const int center_x = game->main_win.cols / 2;
     draw_high_scores(game, center_x, row_start);
 
     int row = row_start + ASCII_HIGH_SCORE_LINES;
@@ -33,7 +33,7 @@ void show_high_scores(Game* game, const int row_start) {
     while (current != NULL && row < game->main_win.rows - 1) {
         char* buf;
         asprintf(&buf, "%d) %d - %s", index, current->score, current->username);
-        int length = strlen(buf);
+        const int length = strlen(buf);
         mvwprintw(win, row, center_x - (length / 2), "%s", buf);
         free(buf);
         row++;
@@ -94,8 +94,8 @@ static void cleanup_menu_stars(Game* game) {
     game->entities.stars = NULL;
 }
 
-static void draw_menu_options(WINDOW* win, const int selection, const int num_options, const char** options,
-                              const int start_y, const int center_x) {
+static void draw_menu_options(WINDOW* win, const int selection, const int num_options,
+                              const char** options, const int start_y, const int center_x) {
     for (int i = 0; i < num_options; i++) {
         if (i == selection) {
             wattron(win, A_REVERSE | A_BOLD);
@@ -108,7 +108,7 @@ static void draw_menu_options(WINDOW* win, const int selection, const int num_op
 }
 
 static int handle_menu_input(WINDOW* win, int* const selection, const int num_options) {
-    int c = wgetch(win);
+    const int c = wgetch(win);
     if (c == ERR) return 0;
 
     if (c == KEY_UP) {
@@ -126,8 +126,8 @@ static int handle_menu_input(WINDOW* win, int* const selection, const int num_op
 MenuOption show_start_menu(Game* game) {
     WINDOW* win = game->main_win.window;
     int selection = 0;
-    int num_options = 4;
     const char* options[] = {"START GAME", "HIGH SCORES", "CHANGE USERNAME", "EXIT"};
+    const int num_options = sizeof(options) / sizeof(options[0]);
 
     game->entities.stars = NULL;
 
@@ -139,11 +139,11 @@ MenuOption show_start_menu(Game* game) {
 
         draw_menu_stars(game, win);
 
-        int center_x = game->main_win.cols / 2;
-        int art_start_y = 1;
+        const int center_x = game->main_win.cols / 2;
+        const int art_start_y = 1;
         draw_logo(game, center_x, art_start_y);
 
-        int menu_start_y = art_start_y + 10;
+        const int menu_start_y = art_start_y + 10;
         draw_menu_options(win, selection, num_options, options, menu_start_y, center_x);
 
         if (game->username) {
@@ -199,7 +199,7 @@ void get_username(Game* game) {
         strcpy(buffer, "Player");
     }
 
-    char* new_ptr = realloc(game->username, strlen(buffer) + 1);
+    char* new_ptr = (char*)realloc(game->username, strlen(buffer) + 1);
     if (new_ptr) {
         game->username = new_ptr;
         strcpy(game->username, buffer);

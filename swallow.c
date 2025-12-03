@@ -10,8 +10,8 @@
 
 static void handle_swallow_star(Game* game, Swallow* s) {
     Star* prev = NULL;
-    int tx = s->ent.x + s->ent.dx;
-    int ty = s->ent.y + s->ent.dy;
+    const int tx = s->ent.x + s->ent.dx;
+    const int ty = s->ent.y + s->ent.dy;
 
     Star* target = find_star_collision(game, &prev, tx, ty, s->ent.width, s->ent.height);
 
@@ -23,8 +23,8 @@ static void handle_swallow_star(Game* game, Swallow* s) {
 
 static void handle_swallow_hunter(Game* game, Swallow* s) {
     Hunter* prev = NULL;
-    int tx = s->ent.x + s->ent.dx;
-    int ty = s->ent.y + s->ent.dy;
+    const int tx = s->ent.x + s->ent.dx;
+    const int ty = s->ent.y + s->ent.dy;
 
     Hunter* target = find_hunter_collision(game, &prev, tx, ty, s->ent.width, s->ent.height);
 
@@ -58,7 +58,7 @@ void process_swallow(Game* game) {
         s->ent.anim_frame = !s->ent.anim_frame;
     }
 
-    collision_t ret = process_entity_tick(game, &s->ent, SWALLOW);
+    const collision_t ret = process_entity_tick(game, &s->ent, SWALLOW);
 
     if (ret == STAR) {
         handle_swallow_star(game, s);
@@ -69,11 +69,11 @@ void process_swallow(Game* game) {
 }
 
 static int is_zone_safe(Game* game, int x, int y, int w, int h) {
-    int pad = 3;
-    int check_x = x - pad;
-    int check_y = y - pad;
-    int check_w = w + (pad * 2);
-    int check_h = h + (pad * 2);
+    const int pad = 3;
+    const int check_x = x - pad;
+    const int check_y = y - pad;
+    const int check_w = w + (pad * 2);
+    const int check_h = h + (pad * 2);
 
     if (check_x < 2 || check_y < 2 || check_x + check_w >= game->main_win.cols - 2 ||
         check_y + check_h >= game->main_win.rows - 2) {
@@ -86,8 +86,8 @@ static int is_zone_safe(Game* game, int x, int y, int w, int h) {
 
 static void find_safe_zone(Game* game, int* safe_x, int* safe_y, int w, int h) {
     for (int i = 0; i < MAX_SAFE_ZONE_ATTEMPTS; i++) {
-        int tx = 2 + (rand() % (game->main_win.cols - 10));
-        int ty = 2 + (rand() % (game->main_win.rows - 10));
+        const int tx = 2 + (rand() % (game->main_win.cols - 10));
+        const int ty = 2 + (rand() % (game->main_win.rows - 10));
         if (is_zone_safe(game, tx, ty, w, h)) {
             *safe_x = tx;
             *safe_y = ty;
@@ -127,8 +127,8 @@ static void draw_static_scene(Game* game) {
 static void run_taxi_animation(Game* game, entity_t* taxi, int target_x, int target_y) {
     float cur_x = taxi->x;
     float cur_y = taxi->y;
-    float dx = (target_x - cur_x) / 20.0f;
-    float dy = (target_y - cur_y) / 20.0f;
+    const float dx = (target_x - cur_x) / 20.0f;
+    const float dy = (target_y - cur_y) / 20.0f;
 
     for (int i = 0; i < 20; i++) {
         remove_sprite(game, taxi);

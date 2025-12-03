@@ -7,8 +7,8 @@
 #include "types.h"
 
 static void get_spawn_coordinates(Game* game, entity_t* hunter_ent, const direction_t side) {
-    int w = hunter_ent->width;
-    int h = hunter_ent->height;
+    const int w = hunter_ent->width;
+    const int h = hunter_ent->height;
     int max_r = game->main_win.rows - h - 2;
     int max_c = game->main_win.cols - w - 2;
     if (max_r <= 0) max_r = 1;
@@ -48,10 +48,10 @@ static void setup_hunter_physics(Hunter* hun, const int x, const int y, const di
 }
 
 static Hunter* init_hunter_data(Game* game, const int template_idx) {
-    Hunter* hun = malloc(sizeof(Hunter));
+    Hunter* hun = (Hunter*)malloc(sizeof(Hunter));
     if (!hun) return NULL;
 
-    HunterTypes* t = &game->config.hunter_templates[template_idx];
+    const HunterTypes* t = &game->config.hunter_templates[template_idx];
 
     for (int i = 0; i < NUM_DIRECTIONS; i++) {
         hun->ent.sprites[i] = t->sprites[i];
@@ -79,13 +79,13 @@ static Hunter* init_hunter_data(Game* game, const int template_idx) {
 }
 
 void spawn_hunter(Game* game) {
-    int t_idx = rand() % game->config.hunter_templates_amount;
-    direction_t dir = (direction_t)(rand() % NUM_DIRECTIONS);
+    const int t_idx = rand() % game->config.hunter_templates_amount;
+    const direction_t dir = (direction_t)(rand() % NUM_DIRECTIONS);
 
     Hunter* new_hunter = init_hunter_data(game, t_idx);
     if (!new_hunter) return;
 
-    float elapsed = game->config.timer - game->time_left;
+    const float elapsed = game->config.timer - game->time_left;
     int bonus_bounces = 0;
     if (game->config.hunter_bounce_escalation > 0)
         bonus_bounces = (int)(elapsed / game->config.hunter_bounce_escalation);
@@ -104,7 +104,8 @@ Hunter* remove_hunter(Game* game, Hunter* current, Hunter* prev) {
                                         offsetof(Hunter, next), offsetof(Hunter, ent));
 }
 
-static int resolve_hunter_collision(Game* game, Hunter** curr, Hunter* prev, const collision_t ret) {
+static int resolve_hunter_collision(Game* game, Hunter** curr, Hunter* prev,
+                                    const collision_t ret) {
     Hunter* h = *curr;
     if (ret != EMPTY) {
         h->state = HUNTER_IDLE;
@@ -199,7 +200,7 @@ void process_hunters(Game* game) {
             current = current->next;
             continue;
         }
-        collision_t ret = process_entity_tick(game, &current->ent, HUNTER);
+        const collision_t ret = process_entity_tick(game, &current->ent, HUNTER);
 
         if (resolve_hunter_collision(game, &current, prev, ret)) {
             continue;

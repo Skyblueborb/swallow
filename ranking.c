@@ -9,23 +9,23 @@ typedef struct {
 } SortEntry;
 
 static int compare_scores(const void* a, const void* b) {
-    SortEntry* entryA = (SortEntry*)a;
-    SortEntry* entryB = (SortEntry*)b;
+    const SortEntry* entryA = (SortEntry*)a;
+    const SortEntry* entryB = (SortEntry*)b;
     return (entryB->score - entryA->score);
 }
 
-RankingNode* load_rankings() {
+const RankingNode* load_rankings() {
     FILE* file = fopen("ranking.txt", "r");
     if (!file) return NULL;
 
-    RankingNode* head = NULL;
+    const RankingNode* head = NULL;
     RankingNode* tail = NULL;
 
     int score;
     char name[MAX_USERNAME_LENGTH];
 
     while (fscanf(file, "%d %49s", &score, name) == 2) {
-        RankingNode* new_node = malloc(sizeof(RankingNode));
+        RankingNode* new_node = (RankingNode*)malloc(sizeof(RankingNode));
         if (!new_node) break;
 
         new_node->score = score;
@@ -64,7 +64,7 @@ void save_ranking(Game* game) {
         int temp_score;
         char temp_name[50];
         while (fscanf(read_file, "%d %49s", &temp_score, temp_name) == 2) {
-            entries = realloc(entries, sizeof(SortEntry) * (count + 1));
+            entries = (SortEntry*)realloc(entries, sizeof(SortEntry) * (count + 1));
             entries[count].score = temp_score;
             strcpy(entries[count].username, temp_name);
             count++;
@@ -72,7 +72,7 @@ void save_ranking(Game* game) {
         fclose(read_file);
     }
 
-    entries = realloc(entries, sizeof(SortEntry) * (count + 1));
+    entries = (SortEntry*)realloc(entries, sizeof(SortEntry) * (count + 1));
     entries[count].score = (int)game->score;
     strncpy(entries[count].username, game->username, 49);
     entries[count].username[49] = '\0';

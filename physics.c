@@ -3,10 +3,10 @@
 
 void update_occupancy_map(char** occupancy_map, int rows, int cols, entity_t* ent,
                           char map_representation) {
-    int x = ent->x;
-    int y = ent->y;
-    int width = ent->width;
-    int height = ent->height;
+    const int x = ent->x;
+    const int y = ent->y;
+    const int width = ent->width;
+    const int height = ent->height;
 
     for (int i = y; i < y + height; i++) {
         for (int j = x; j < x + width; j++) {
@@ -83,11 +83,11 @@ void move_entity(entity_t* entity, int dx, int dy) {
     entity->y += dy;
 }
 
-int attempt_move_entity(Game* game, entity_t* ent) {
-    int check_x = ent->x + ent->dx;
-    int check_y = ent->y + ent->dy;
+collision_t attempt_move_entity(Game* game, entity_t* ent) {
+    const int check_x = ent->x + ent->dx;
+    const int check_y = ent->y + ent->dy;
 
-    collision_t ret =
+    const collision_t ret =
             check_occupancy_map(game->occupancy_map, game->main_win.rows, game->main_win.cols,
                                 check_x, check_y, ent->width, ent->height);
     if (ret == EMPTY) {
@@ -104,15 +104,15 @@ static void* find_generic_collision(void* head, void** prev_out, size_t next_off
     void* last = NULL;
 
     while (current != NULL) {
-        entity_t* ent = (entity_t*)((char*)current + ent_offset);
+        const entity_t* ent = (entity_t*)((char*)current + ent_offset);
 
-        int ent_left = ent->x;
-        int ent_right = ent->x + ent->width;
-        int ent_top = ent->y;
-        int ent_bottom = ent->y + ent->height;
+        const int ent_left = ent->x;
+        const int ent_right = ent->x + ent->width;
+        const int ent_top = ent->y;
+        const int ent_bottom = ent->y + ent->height;
 
-        int area_right = area_x + area_w;
-        int area_bottom = area_y + area_h;
+        const int area_right = area_x + area_w;
+        const int area_bottom = area_y + area_h;
 
         if (ent_left < area_right && ent_right > area_x && ent_top < area_bottom &&
             ent_bottom > area_y) {
@@ -121,7 +121,7 @@ static void* find_generic_collision(void* head, void** prev_out, size_t next_off
         }
 
         last = current;
-        void** next_ptr = (void**)((char*)current + next_offset);
+        void* const* const next_ptr = (void**)((char*)current + next_offset);
         current = *next_ptr;
     }
     return NULL;
@@ -142,10 +142,10 @@ Star* find_star_collision(Game* game, Star** prev_out, int area_x, int area_y, i
 }
 
 int is_touching(entity_t* s, entity_t* t) {
-    int tolerance = 1;
-
-    if (s->x < t->x + t->width + tolerance && s->x + s->width > t->x - tolerance &&
-        s->y < t->y + t->height + tolerance && s->y + s->height > t->y - tolerance) {
+    if (s->x < t->x + t->width + PHYSICS_TOUCHING_TOLERANCE &&
+        s->x + s->width > t->x - PHYSICS_TOUCHING_TOLERANCE &&
+        s->y < t->y + t->height + PHYSICS_TOUCHING_TOLERANCE &&
+        s->y + s->height > t->y - PHYSICS_TOUCHING_TOLERANCE) {
         return 1;
     }
     return 0;

@@ -4,7 +4,7 @@
 #include "types.h"
 
 void strip_newline(char* str) {
-    size_t len = strlen(str);
+    const size_t len = strlen(str);
     if (len > 0 && str[len - 1] == '\n') {
         str[len - 1] = '\0';
     }
@@ -76,8 +76,8 @@ void init_curses() {
 }
 
 void setup_windows(WIN* main_win, WIN* status_win, const conf_t* config) {
-    int game_area_height = config->window_height;
-    int game_area_width = config->window_width;
+    const int game_area_height = config->window_height;
+    const int game_area_width = config->window_width;
 
     main_win->rows = 4 * game_area_height / 5;
     main_win->cols = game_area_width;
@@ -96,10 +96,10 @@ void setup_windows(WIN* main_win, WIN* status_win, const conf_t* config) {
 }
 
 void setup_menu_window(WIN* menu_win) {
-    int rows = 32;
-    int cols = 100;
-    int x = 0;
-    int y = 0;
+    const int rows = MENU_ROWS;
+    const int cols = MENU_COLS;
+    const int x = MENU_X;
+    const int y = MENU_Y;
 
     if (menu_win->window) {
         wclear(stdscr);
@@ -122,7 +122,7 @@ void setup_menu_window(WIN* menu_win) {
 
 void free_occupancy_map(Game* game) {
     if (game->occupancy_map != NULL) {
-        int rows = game->main_win.rows;
+        const int rows = game->main_win.rows;
         for (int y = 0; y < rows; y++) {
             free(game->occupancy_map[y]);
         }
@@ -132,10 +132,10 @@ void free_occupancy_map(Game* game) {
 }
 
 void init_occupancy_map(Game* game) {
-    int rows = game->main_win.rows;
-    int cols = game->main_win.cols;
+    const int rows = game->main_win.rows;
+    const int cols = game->main_win.cols;
 
-    game->occupancy_map = calloc(rows, sizeof(char*));
+    game->occupancy_map = (char**)calloc(rows, sizeof(char*));
 
     if (game->occupancy_map == NULL) {
         endwin();
@@ -144,7 +144,7 @@ void init_occupancy_map(Game* game) {
     }
 
     for (int y = 0; y < rows; y++) {
-        game->occupancy_map[y] = malloc(cols * sizeof(char));
+        game->occupancy_map[y] = (char*)malloc(cols * sizeof(char));
         if (game->occupancy_map[y] == NULL) {
             endwin();
             fprintf(stderr, "Fatal Error: Failed to allocate memory for map columns.\n");
@@ -165,7 +165,7 @@ void init_occupancy_map(Game* game) {
 }
 
 void change_game_speed(Game* game, increment_t increment) {
-    int current_speed = game->game_speed;
+    const int current_speed = game->game_speed;
     if (increment == UP && game->config.max_speed >= current_speed + 1) {
         game->game_speed++;
     } else if (increment == DOWN && game->config.min_speed <= current_speed - 1) {
@@ -186,7 +186,7 @@ int load_levels(char*** files) {
 
     while ((dir = readdir(d))) {
         if (strstr(dir->d_name, ".conf")) {
-            char** tmp = realloc(*files, sizeof(char*) * (count + 1));
+            char** tmp = (char**)realloc(*files, sizeof(char*) * (count + 1));
             if (tmp) {
                 *files = tmp;
                 (*files)[count++] = strdup(dir->d_name);
