@@ -154,7 +154,6 @@ void init_occupancy_map(Game* game) {
 
     for (int y = 0; y < rows; y++) {
         for (int x = 0; x < cols; x++) {
-            game->occupancy_map[y][x] = ' ';
             if (y == 0 || x == 0 || x == cols - 1 || y == rows - 1) {
                 game->occupancy_map[y][x] = WALL;
             } else {

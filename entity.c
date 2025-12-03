@@ -46,8 +46,7 @@ int check_intercept_course(const entity_t* h, const entity_t* s) {
 }
 
 collision_t process_entity_tick(Game* game, entity_t* ent, char representation) {
-    remove_sprite(game, ent);
-    update_occupancy_map(game->occupancy_map, game->main_win.rows, game->main_win.cols, ent, ' ');
+    remove_entity(game, ent);
     collision_t ret = attempt_move_entity(game, ent);
     update_occupancy_map(game->occupancy_map, game->main_win.rows, game->main_win.cols, ent,
                          representation);
@@ -57,7 +56,7 @@ collision_t process_entity_tick(Game* game, entity_t* ent, char representation) 
 
 void remove_entity(Game* game, entity_t* ent) {
     remove_sprite(game, ent);
-    update_occupancy_map(game->occupancy_map, game->main_win.rows, game->main_win.cols, ent, ' ');
+    update_occupancy_map(game->occupancy_map, game->main_win.rows, game->main_win.cols, ent, EMPTY);
 }
 
 void* remove_generic_node(Game* game, void** head_ref, void* current, void* prev,
