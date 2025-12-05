@@ -41,12 +41,35 @@ static void get_spawn_coordinates(Game* game, entity_t* hunter_ent, const direct
     hunter_ent->y = y;
 }
 
+/**
+ * setup_hunter_physics - Initializes velocity and direction
+ * @hun: The hunter to modify
+ * @x: Spawn X position
+ * @y: Spawn Y position
+ * @dir: The initial direction
+ *
+ * Sets the position and applies the velocity vector based on the direction.
+ *
+ * RETURNS
+ * Void.
+ */
 static void setup_hunter_physics(Hunter* hun, const int x, const int y, const direction_t dir) {
     hun->ent.x = x;
     hun->ent.y = y;
     change_entity_direction(&hun->ent, dir, hun->ent.speed);
 }
 
+/**
+ * init_hunter_data - Allocates and initializes a new hunter
+ * @game: Main game struct
+ * @template_idx: index of the current hunter template
+ *
+ * Mallocs a new Hunter struct and copies all properties (sprites, dimensions,
+ * speed, damage) from the specified template. Initializes state to IDLE.
+ *
+ * RETRUNS
+ * Pointer to the new Hunter, or NULL if malloc fails.
+ */
 static Hunter* init_hunter_data(Game* game, const int template_idx) {
     Hunter* hun = (Hunter*)malloc(sizeof(Hunter));
     if (!hun) return NULL;
@@ -104,6 +127,21 @@ Hunter* remove_hunter(Game* game, Hunter* current, Hunter* prev) {
                                         offsetof(Hunter, next), offsetof(Hunter, ent));
 }
 
+/**
+ * resolve_hunter_collision - Handles hunter collisions and state updates
+ * @game: Pointer to the main game struct
+ * @curr: Pointer to the current hunter pointer (for removal updates)
+ * @prev: Pointer to the previous hunter node
+ * @ret: The collision type returned by physics check
+ *
+ * Handles bouncing (calculating reflection axis), damage to player,
+ * and removal if bounces are exhausted or player/hunter collision occurs.
+ * Resets state to IDLE on collision.
+ *
+ * RETURNS
+ * 1 if hunter was removed
+ * 0 otherwise
+ */
 static int resolve_hunter_collision(Game* game, Hunter** curr, Hunter* prev,
                                     const collision_t ret) {
     Hunter* h = *curr;
@@ -156,6 +194,17 @@ static int resolve_hunter_collision(Game* game, Hunter** curr, Hunter* prev,
     return 0;
 }
 
+/**
+ * handle_hunter_logic - Hunter dashing logic
+ * @h: The hunter entity
+ * @s: The swallow target
+ *
+ * IDLE: Checks if it won't intercept swallow. If so, enters PAUSED.
+ * PAUSED: Waits for state_timer ticks, then charges (DASHING) at swallow.
+ * DASHING: Moves fast until collision.
+ *
+ * Returns: 1 if movement should be skipped this tick (e.g. while Paused), 0 otherwise.
+ */
 static int handle_hunter_logic(Hunter* h, const Swallow* s) {
     if (h->dash_cooldown > 0) {
         h->dash_cooldown--;

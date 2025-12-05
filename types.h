@@ -25,6 +25,10 @@
 
 #define PHYSICS_TOUCHING_TOLERANCE 1
 
+#define SWALLOW_HP 100
+#define SWALLOW_SIZE 3
+#define SWALLOW_SPEED 1
+
 typedef struct {
     WINDOW* window;
     int x, y, rows, cols;

@@ -8,6 +8,9 @@
 
 #define ANIMATION_TICKS 5
 
+#define ALBATROSS_TAXI_DURATION 20.0f
+#define SAFE_ZONE_PADDING 10
+
 static void handle_swallow_star(Game* game, Swallow* s) {
     Star* prev = NULL;
     const int tx = s->ent.x + s->ent.dx;
@@ -86,8 +89,8 @@ static int is_zone_safe(Game* game, int x, int y, int w, int h) {
 
 static void find_safe_zone(Game* game, int* safe_x, int* safe_y, int w, int h) {
     for (int i = 0; i < MAX_SAFE_ZONE_ATTEMPTS; i++) {
-        const int tx = 2 + (rand() % (game->main_win.cols - 10));
-        const int ty = 2 + (rand() % (game->main_win.rows - 10));
+        const int tx = 2 + (rand() % (game->main_win.cols - SAFE_ZONE_PADDING));
+        const int ty = 2 + (rand() % (game->main_win.rows - SAFE_ZONE_PADDING));
         if (is_zone_safe(game, tx, ty, w, h)) {
             *safe_x = tx;
             *safe_y = ty;
@@ -127,8 +130,8 @@ static void draw_static_scene(Game* game) {
 static void run_taxi_animation(Game* game, entity_t* taxi, int target_x, int target_y) {
     float cur_x = taxi->x;
     float cur_y = taxi->y;
-    const float dx = (target_x - cur_x) / 20.0f;
-    const float dy = (target_y - cur_y) / 20.0f;
+    const float dx = (target_x - cur_x) / ALBATROSS_TAXI_DURATION;
+    const float dy = (target_y - cur_y) / ALBATROSS_TAXI_DURATION;
 
     for (int i = 0; i < 20; i++) {
         remove_sprite(game, taxi);
@@ -151,12 +154,12 @@ static void run_taxi_animation(Game* game, entity_t* taxi, int target_x, int tar
 void init_swallow(Game* game, Swallow* swallow) {
     entity_t* s = &swallow->ent;
 
-    swallow->hp = 100;
-    s->width = 3;
-    s->height = 3;
+    swallow->hp = SWALLOW_HP;
+    s->width = SWALLOW_SIZE;
+    s->height = SWALLOW_SIZE;
     s->x = game->main_win.cols / 2;
     s->y = game->main_win.rows / 2;
-    s->speed = 1;
+    s->speed = SWALLOW_SPEED;
     s->direction = DIR_RIGHT;
     s->dx = s->speed;
     s->dy = 0;
@@ -177,6 +180,8 @@ void init_swallow(Game* game, Swallow* swallow) {
             ".\\ "
             "=o>"
             "./ ";
+
+    // Altenative sprite for wing flapping
     s->anim_frame = 0;
     s->anim_timer = 0;
     s->anim_sprites[DIR_UP] =

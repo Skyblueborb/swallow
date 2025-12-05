@@ -224,8 +224,29 @@ static void process_config_line(char* line, conf_t* config, int* hunter_idx) {
     }
 }
 
+static void init_default_conf(conf_t *config)
+{
+    config->level_nr = 1;
+    config->window_height = 40;
+    config->window_width = 80;
+    config->star_quota = 10;
+    config->timer = 50.0f;
+    config->star_quota = 3.0f;
+    config->hunter_spawn = 12.0f;
+    config->min_speed = 1;
+    config->max_speed = 5;
+    config->seed = 2137;
+    config->score_time_weight = 20.0f;
+    config->score_stars_weight = 200.0f;
+    config->score_life_weight = 5.0f;
+    config->albatross_cooldown = 15;
+    config->hunter_spawn_escalation = 0.05f;
+    config->hunter_bounce_escalation = 5.0f;
+}
+
 conf_t read_config(const char* filename) {
     conf_t config = {0};
+    init_default_conf(&config);
     FILE* file = fopen(filename, "r");
     if (!file) {
         perror("Error opening config file");

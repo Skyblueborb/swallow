@@ -111,9 +111,11 @@ static void handle_hunter_spawner(Game* game) {
 static int calculate_score(Game* game) {
     float score = 0;
     score += game->stars_collected * game->config.score_stars_weight;
-    score += game->time_left * game->config.score_time_weight;
-    score += game->entities.swallow->hp * game->config.score_life_weight;
-    if (game->result == WINNER) score *= game->config.level_nr * game->result;
+    if (game->result == WINNER) {
+        score += game->entities.swallow->hp * game->config.score_life_weight;
+        score += game->time_left * game->config.score_time_weight;
+        score *= game->config.level_nr * game->result;
+    }
 
     return (int)score;
 }
