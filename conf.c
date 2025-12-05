@@ -224,8 +224,7 @@ static void process_config_line(char* line, conf_t* config, int* hunter_idx) {
     }
 }
 
-static void init_default_conf(conf_t *config)
-{
+static void init_default_conf(conf_t* config) {
     config->level_nr = 1;
     config->window_height = 40;
     config->window_width = 80;

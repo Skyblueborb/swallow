@@ -26,8 +26,7 @@ collision_t check_occupancy_map(char** occupancy_map, int rows, int cols, int x,
     }
     for (int i = y; i < y + height; i++) {
         for (int j = x; j < x + width; j++) {
-            if(occupancy_map[i][j] != EMPTY)
-                return (collision_t)occupancy_map[i][j];
+            if (occupancy_map[i][j] != EMPTY) return (collision_t)occupancy_map[i][j];
         }
     }
     return EMPTY;
