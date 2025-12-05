@@ -1,6 +1,7 @@
 #include <ctype.h>
 #include <ncurses.h>
 #include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
 
 #include "conf.h"
@@ -9,13 +10,20 @@
 #include "menu.h"
 #include "physics.h"
 #include "ranking.h"
+#include "replay.h"
 #include "star.h"
 #include "swallow.h"
 #include "types.h"
 #include "utils.h"
 
-static void handle_game_input(Game* game, entity_t* swallow) {
-    const int ch = tolower(getch());
+static void handle_game_input(Game* game, entity_t* swallow, char replay_char) {
+    int ch = ERR;
+    if (game->replay.replay_state == REPLAY_RECORDING) {
+        ch = tolower(getch());
+        save_key(game, ch);
+    } else if (game->replay.replay_state == REPLAY_PLAYING) {
+        ch = replay_char;
+    }
 
     if (ch != ERR) {
         switch (ch) {
@@ -164,7 +172,13 @@ void game_loop(Game* game) {
     const float delta_seconds = (float)sleep_us / 1000000.0f;
 
     Swallow* swallow = game->entities.swallow;
-    handle_game_input(game, &swallow->ent);
+    if (game->replay.replay_state == REPLAY_RECORDING) {
+        handle_game_input(game, &swallow->ent, ERR);
+    } else if (game->replay.replay_state == REPLAY_PLAYING) {
+        handle_game_input(game, &swallow->ent,
+                          game->replay.replay_keys[game->replay.playback_index]);
+        game->replay.playback_index++;
+    }
 
     process_swallow(game);
     process_hunters(game);
@@ -187,11 +201,33 @@ void game_loop(Game* game) {
     usleep(sleep_us);
 }
 
-void start_game(Game* game) {
+static void setup_game_normal(Game* game) {
     char* level_path = select_level(game);
     free_config(&game->config);
     game->config = read_config(level_path);
+
+    if (game->replay.replay_keys != NULL) {
+        free(game->replay.replay_level_name);
+        free(game->replay.replay_keys);
+    }
+    game->replay.replay_level_name = strdup(level_path);
+    game->replay.replay_keys = NULL;
+
     free(level_path);
+}
+
+static void setup_game_replay(Game* game) {
+    free_config(&game->config);
+    game->config = read_config(game->replay.replay_level_name);
+    game->replay.playback_index = 0;
+}
+
+void start_game(Game* game) {
+    if (game->replay.replay_state == REPLAY_RECORDING) {
+        setup_game_normal(game);
+    } else if (game->replay.replay_state == REPLAY_PLAYING) {
+        setup_game_replay(game);
+    }
 
     delwin(game->main_win.window);
     delwin(game->status_win.window);

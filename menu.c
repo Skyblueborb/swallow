@@ -126,7 +126,8 @@ static int handle_menu_input(WINDOW* win, int* const selection, const int num_op
 MenuOption show_start_menu(Game* game) {
     WINDOW* win = game->main_win.window;
     int selection = 0;
-    const char* options[] = {"START GAME", "HIGH SCORES", "CHANGE USERNAME", "EXIT"};
+    const char* options[] = {"START GAME", "REPLAY LAST FLIGHT", "HIGH SCORES", "CHANGE USERNAME",
+                             "EXIT"};
     const int num_options = sizeof(options) / sizeof(options[0]);
 
     game->entities.stars = NULL;
@@ -266,8 +267,25 @@ char* select_level(Game* game) {
 void handle_menu_choice(Game* game, const MenuOption choice) {
     switch (choice) {
         case MENU_START_GAME:
+            game->replay.replay_state = REPLAY_RECORDING;
             start_game(game);
             end_game(game);
+            break;
+        case MENU_REPLAY:
+            if (game->replay.replay_keys != NULL) {
+                game->replay.replay_state = REPLAY_PLAYING;
+                start_game(game);
+                end_game(game);
+            } else {
+                wclear(game->main_win.window);
+                draw_main(game);
+                mvwprintw(game->main_win.window, CENTER_X_OFFSET, CENTER_Y_OFFSET,
+                          "No replays yet!");
+                wrefresh(game->main_win.window);
+                nodelay(game->main_win.window, FALSE);
+                wgetch(game->main_win.window);
+                nodelay(game->main_win.window, TRUE);
+            }
             break;
         case MENU_HIGH_SCORES:
             show_high_scores(game, 1);

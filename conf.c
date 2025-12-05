@@ -231,6 +231,7 @@ static void init_default_conf(conf_t* config) {
     config->star_quota = 10;
     config->timer = 50.0f;
     config->star_quota = 3;
+    config->star_spawn = 4.0f;
     config->hunter_spawn = 12.0f;
     config->min_speed = 1;
     config->max_speed = 5;

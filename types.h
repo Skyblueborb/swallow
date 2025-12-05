@@ -59,6 +59,8 @@
 
 #define LEVEL_SELECT_X_OFFSET 20
 
+#define REPLAY_CHUNK 512
+
 typedef struct {
     WINDOW* window;
     int x, y, rows, cols;
@@ -109,6 +111,11 @@ typedef enum {
     C_GREY_1,
     C_GREY_2
 } ColorPair;
+
+typedef enum {
+    REPLAY_RECORDING,
+    REPLAY_PLAYING
+} ReplayState;
 
 // Entity types
 typedef struct {
@@ -199,18 +206,28 @@ typedef struct GameEntities {
 } GameEntities;
 
 typedef struct {
+    ReplayState replay_state;
+    char* replay_keys;
+    char* replay_level_name;
+    unsigned int replay_index;
+    unsigned int replay_chunks;
+    unsigned int playback_index;
+} replay_t;
+
+typedef struct {
     conf_t config;
     WIN main_win;
     WIN status_win;
     char running;
     char menu_running;
+    replay_t replay;
     char result;
     char** occupancy_map;
     char* username;
     float time_left;
+    float albatross_cooldown;
     int game_speed;
     int stars_collected;
-    float albatross_cooldown;
     int hunter_spawn_tick;
     int star_spawn_tick;
     int star_move_tick;
@@ -225,6 +242,6 @@ typedef struct RankingNode {
     struct RankingNode* next;
 } RankingNode;
 
-typedef enum { MENU_START_GAME, MENU_HIGH_SCORES, MENU_USERNAME, MENU_EXIT } MenuOption;
+typedef enum { MENU_START_GAME, MENU_REPLAY, MENU_HIGH_SCORES, MENU_USERNAME, MENU_EXIT } MenuOption;
 
 #endif  // TYPES_H
