@@ -9,8 +9,8 @@
 static void get_spawn_coordinates(Game* game, entity_t* hunter_ent, const direction_t side) {
     const int w = hunter_ent->width;
     const int h = hunter_ent->height;
-    int max_r = game->main_win.rows - h - 2;
-    int max_c = game->main_win.cols - w - 2;
+    int max_r = game->main_win.rows - h - BORDER_WIDTH;
+    int max_c = game->main_win.cols - w - BORDER_WIDTH;
     if (max_r <= 0) {
         max_r = 1;
     }
@@ -18,23 +18,24 @@ static void get_spawn_coordinates(Game* game, entity_t* hunter_ent, const direct
         max_c = 1;
     }
 
-    int x = 2, y = 2;
+    int x = BORDER_WIDTH;
+    int y = BORDER_WIDTH;
 
     switch (side) {
         case DIR_RIGHT:
-            x = 2;
-            y = 2 + (rand() % max_r);
+            x = BORDER_WIDTH;
+            y = BORDER_WIDTH + (rand() % max_r);
             break;
         case DIR_LEFT:
             x = max_c;
-            y = 2 + (rand() % max_r);
+            y = BORDER_WIDTH + (rand() % max_r);
             break;
         case DIR_DOWN:
-            x = 2 + (rand() % max_c);
-            y = 2;
+            x = BORDER_WIDTH + (rand() % max_c);
+            y = BORDER_WIDTH;
             break;
         case DIR_UP:
-            x = 2 + (rand() % max_c);
+            x = BORDER_WIDTH + (rand() % max_c);
             y = max_r;
             break;
         default:

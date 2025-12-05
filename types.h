@@ -62,6 +62,8 @@
 
 #define REPLAY_CHUNK 512
 
+#define BORDER_WIDTH 2
+
 typedef struct {
     WINDOW* window;
     int x, y, rows, cols;

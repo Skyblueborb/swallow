@@ -231,7 +231,9 @@ char* select_level(Game* game) {
     }
 
     WINDOW* win = game->main_win.window;
-    int sel = 0, c = 0, cx = (game->main_win.cols - LEVEL_SELECT_X_OFFSET) / 2;
+    int sel = 0;
+    int c = 0;
+    int cx = (game->main_win.cols - LEVEL_SELECT_X_OFFSET) / 2;
 
     nodelay(game->main_win.window, FALSE);
     keypad(win, TRUE);

@@ -206,7 +206,8 @@ void call_albatross_taxi(Game* game) {
     }
 
     Swallow* s = game->entities.swallow;
-    int safe_x = 0, safe_y = 0;
+    int safe_x = 0;
+    int safe_y = 0;
 
     find_safe_zone(game, &safe_x, &safe_y, s->ent.width, s->ent.height);
     if (safe_x == -1) {
