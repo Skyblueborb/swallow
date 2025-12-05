@@ -114,7 +114,7 @@ void draw_logo(Game* game, const int center_x, const int art_start_y) {
     draw_ascii_art(game, center_x, art_start_y, logo_art, logo_lines, PAIR_PLAYER);
 }
 
-static const char** get_win_logo(int *count) {
+static const char** get_win_logo(int* count) {
     static const char* win_art[] = {
             "          _______                      _______  _        _ ",
             "|\\     /|(  ___  )|\\     /|  |\\     /|(  ___  )( (    /|( )",
@@ -129,7 +129,7 @@ static const char** get_win_logo(int *count) {
     return win_art;
 }
 
-static const char** get_lose_logo(int *count) {
+static const char** get_lose_logo(int* count) {
     static const char* lose_art[] = {
             "          _______             _        _______  _______  _______          ",
             "|\\     /|(  ___  )|\\     /|  ( \\      (  ___  )(  ____ \\(  ____ \\         ",
@@ -148,10 +148,10 @@ void draw_game_over(Game* game, const int center_x, const int art_start_y) {
     int art_lines = 0;
 
     if (game->result == WINNER) {
-        const char **logo = get_win_logo(&art_lines);
+        const char** logo = get_win_logo(&art_lines);
         draw_ascii_art(game, center_x, art_start_y, logo, art_lines, C_GREEN_5);
     } else {
-        const char **logo = get_lose_logo(&art_lines);
+        const char** logo = get_lose_logo(&art_lines);
         draw_ascii_art(game, center_x, art_start_y, logo, art_lines, C_RED_5);
     }
 }

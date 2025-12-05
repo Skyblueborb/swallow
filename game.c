@@ -85,7 +85,8 @@ static void handle_hunter_spawner(Game* game) {
     if (reduction_factor < MAX_REDUCTION_FACTOR) reduction_factor = MAX_REDUCTION_FACTOR;
 
     float current_hunter_threshold = base_hunter_threshold * reduction_factor;
-    if (current_hunter_threshold < MAX_SPAWN_HUNTER_THRESHOLD) current_hunter_threshold = MAX_SPAWN_HUNTER_THRESHOLD;
+    if (current_hunter_threshold < MAX_SPAWN_HUNTER_THRESHOLD)
+        current_hunter_threshold = MAX_SPAWN_HUNTER_THRESHOLD;
 
     game->hunter_spawn_tick++;
     if (game->hunter_spawn_tick >= (int)current_hunter_threshold) {

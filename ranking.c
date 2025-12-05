@@ -24,7 +24,7 @@ const RankingNode* load_rankings() {
     RankingNode* tail = NULL;
 
     int score = 0;
-    char name[MAX_USERNAME_LENGTH] = { 0 };
+    char name[MAX_USERNAME_LENGTH] = {0};
 
     while (fscanf(file, "%d %49s", &score, name) == 2) {
         RankingNode* new_node = (RankingNode*)malloc(sizeof(RankingNode));
@@ -64,7 +64,7 @@ void save_ranking(Game* game) {
     FILE* read_file = fopen("ranking.txt", "r");
     if (read_file) {
         int temp_score = 0;
-        char temp_name[MAX_USERNAME_LENGTH] = { 0 };
+        char temp_name[MAX_USERNAME_LENGTH] = {0};
         while (fscanf(read_file, "%d %49s", &temp_score, temp_name) == 2) {
             entries = (SortEntry*)realloc(entries, sizeof(SortEntry) * (count + 1));
             entries[count].score = temp_score;
