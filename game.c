@@ -20,7 +20,7 @@ static void handle_game_input(Game* game, entity_t* swallow, char replay_char) {
     int ch = ERR;
     if (game->replay.replay_state == REPLAY_RECORDING) {
         ch = tolower(getch());
-        save_key(game, ch);
+        save_key(game, (char)ch);
     } else if (game->replay.replay_state == REPLAY_PLAYING) {
         ch = replay_char;
     }

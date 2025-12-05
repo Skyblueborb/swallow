@@ -131,7 +131,7 @@ static void run_taxi_animation(Game* game, entity_t* taxi, int target_x, int tar
     const float dx = ((float)target_x - cur_x) / ALBATROSS_TAXI_DURATION;
     const float dy = ((float)target_y - cur_y) / ALBATROSS_TAXI_DURATION;
 
-    for (int i = 0; i < 20; i++) {
+    for (int i = 0; i < ALBATROSS_TAXI_FRAMES; i++) {
         remove_sprite(game, taxi);
 
         draw_static_scene(game);

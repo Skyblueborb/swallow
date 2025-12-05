@@ -45,5 +45,10 @@ int main() {
     }
     free_config(&game.config);
 
+    if (game.replay.replay_keys != NULL) {
+        free(game.replay.replay_level_name);
+        free(game.replay.replay_keys);
+    }
+
     return 0;
 }
