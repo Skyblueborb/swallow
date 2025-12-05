@@ -89,7 +89,9 @@ void draw_ascii_art(Game* game, const int center_x, const int art_start_y, const
     for (int i = 0; i < art_lines; i++) {
         const int len = (int)mbstowcs(NULL, ascii_art[i], 0);
         int x = center_x - (len / 2);
-        if (x < 1) x = 1;
+        if (x < 1) {
+            x = 1;
+        }
         mvwprintw(win, art_start_y + i, x, "%s", ascii_art[i]);
     }
     wattroff(win, COLOR_PAIR(color));

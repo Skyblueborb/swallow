@@ -67,10 +67,11 @@ static void draw_menu_stars(Game* game, WINDOW* win) {
 
         if (curr->ent.y >= game->main_win.rows - 1) {
             Star* to_free = curr;
-            if (prev == NULL)
+            if (prev == NULL) {
                 game->entities.stars = curr->next;
-            else
+            } else {
                 prev->next = curr->next;
+            }
 
             curr = curr->next;
             free(to_free);
@@ -109,14 +110,20 @@ static void draw_menu_options(WINDOW* win, const int selection, const int num_op
 
 static int handle_menu_input(WINDOW* win, int* const selection, const int num_options) {
     const int c = wgetch(win);
-    if (c == ERR) return 0;
+    if (c == ERR) {
+        return 0;
+    }
 
     if (c == KEY_UP) {
         (*selection)--;
-        if (*selection < 0) *selection = num_options - 1;
+        if (*selection < 0) {
+            *selection = num_options - 1;
+        }
     } else if (c == KEY_DOWN) {
         (*selection)++;
-        if (*selection >= num_options) *selection = 0;
+        if (*selection >= num_options) {
+            *selection = 0;
+        }
     } else if (c == '\n') {
         return 1;
     }
@@ -175,7 +182,7 @@ void get_username(Game* game) {
     const int rows = game->main_win.rows;
     const int cols = game->main_win.cols;
 
-    // strlen("Enter Username:") = 16
+    // strlen("Enter Username: ") = 16
     const int center_x = (cols - 16) / 2;
     const int center_y = rows / 2 - CENTER_Y_OFFSET;
 
@@ -217,7 +224,9 @@ char* select_level(Game* game) {
     const int count = load_levels(&files);
 
     if (count == 0) {
-        if (files) free((void*)files);
+        if (files) {
+            free((void*)files);
+        }
         return strdup("config.txt");
     }
 
@@ -235,25 +244,32 @@ char* select_level(Game* game) {
         mvwprintw(win, 2, cx, "SELECT LEVEL:");
 
         for (int i = 0; i < count; i++) {
-            if (i == sel) wattron(win, A_REVERSE);
+            if (i == sel) {
+                wattron(win, A_REVERSE);
+            }
             mvwprintw(win, 4 + i, cx, "%s", files[i]);
-            if (i == sel) wattroff(win, A_REVERSE);
+            if (i == sel) {
+                wattroff(win, A_REVERSE);
+            }
         }
         wrefresh(win);
 
         c = wgetch(win);
-        if (c == KEY_UP)
+        if (c == KEY_UP) {
             sel = (sel - 1 + count) % count;
-        else if (c == KEY_DOWN)
+        } else if (c == KEY_DOWN) {
             sel = (sel + 1) % count;
-        else if (c == '\n')
+        } else if (c == '\n') {
             break;
+        }
     }
 
     char* res = NULL;
     asprintf(&res, "levels/%s", files[sel]);
 
-    for (int i = 0; i < count; i++) free(files[i]);
+    for (int i = 0; i < count; i++) {
+        free(files[i]);
+    }
     free((void*)files);
 
     nodelay(game->main_win.window, TRUE);

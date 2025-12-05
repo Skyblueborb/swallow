@@ -27,7 +27,9 @@ collision_t check_occupancy_map(char** occupancy_map, int rows, int cols, int x,
     }
     for (int i = y; i < y + height; i++) {
         for (int j = x; j < x + width; j++) {
-            if (occupancy_map[i][j] != EMPTY) return (collision_t)occupancy_map[i][j];
+            if (occupancy_map[i][j] != EMPTY) {
+                return (collision_t)occupancy_map[i][j];
+            }
         }
     }
     return EMPTY;
@@ -109,7 +111,9 @@ static void* find_generic_collision(void* head, void** prev_out, size_t next_off
 
         if (ent_left < area_right && ent_right > area_x && ent_top < area_bottom &&
             ent_bottom > area_y) {
-            if (prev_out) *prev_out = last;
+            if (prev_out) {
+                *prev_out = last;
+            }
             return current;
         }
 

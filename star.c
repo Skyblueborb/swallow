@@ -30,7 +30,9 @@ static void update_star_color(Game* game, Star* star) {
     const int y = star->ent.y;
     const int height = game->main_win.rows;
 
-    if (height == 0) return;
+    if (height == 0) {
+        return;
+    }
 
     const float star_progress = (float)y / (float)height;
 
@@ -85,21 +87,29 @@ void move_stars(Game* game) {
 
 void spawn_star(Game* game) {
     Star* star = (Star*)malloc(sizeof(Star));
-    if (!star) return;
+    if (!star) {
+        return;
+    }
 
     star->ent.width = 1;
     star->ent.height = 1;
-    for (int i = 0; i < NUM_DIRECTIONS; i++) star->ent.sprites[i] = "*";
+    for (int i = 0; i < NUM_DIRECTIONS; i++) {
+        star->ent.sprites[i] = "*";
+    }
 
     star->ent.speed = (rand() % STAR_SPEED_MAX) + 1;
 
     int max_c = game->main_win.cols - star->ent.width - 2;
-    if (max_c <= 0) max_c = 1;
+    if (max_c <= 0) {
+        max_c = 1;
+    }
 
     star->ent.x = 2 + (rand() % max_c);
     star->ent.y = 1;
     star->ent.color = C_YELLOW_5;
-    for (int i = 0; i < NUM_DIRECTIONS; i++) star->ent.anim_sprites[i] = NULL;
+    for (int i = 0; i < NUM_DIRECTIONS; i++) {
+        star->ent.anim_sprites[i] = NULL;
+    }
     star->ent.anim_frame = 0;
     star->ent.anim_timer = 0;
 

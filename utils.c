@@ -187,7 +187,9 @@ int load_levels(char*** files) {
     int count = 0;
     struct dirent* dir = NULL;
 
-    if (!d) return 0;
+    if (!d) {
+        return 0;
+    }
 
     while ((dir = readdir(d))) {
         if (strstr(dir->d_name, ".conf")) {

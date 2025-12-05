@@ -14,7 +14,9 @@ void save_key(Game* game, char ch) {
         size_t new_size = game->replay.replay_chunks * REPLAY_CHUNK;
 
         char* new_ptr = (char*)realloc(game->replay.replay_keys, new_size);
-        if (new_ptr == NULL) exit(1);
+        if (new_ptr == NULL) {
+            exit(1);
+        }
 
         game->replay.replay_keys = new_ptr;
     }

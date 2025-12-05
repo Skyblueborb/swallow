@@ -18,7 +18,9 @@ static int compare_scores(const void* a, const void* b) {
 
 const RankingNode* load_rankings() {
     FILE* file = fopen("ranking.txt", "r");
-    if (!file) return NULL;
+    if (!file) {
+        return NULL;
+    }
 
     const RankingNode* head = NULL;
     RankingNode* tail = NULL;
@@ -28,7 +30,9 @@ const RankingNode* load_rankings() {
 
     while (fscanf(file, "%d %49s", &score, name) == 2) {
         RankingNode* new_node = (RankingNode*)malloc(sizeof(RankingNode));
-        if (!new_node) break;
+        if (!new_node) {
+            break;
+        }
 
         new_node->score = score;
         strncpy(new_node->username, name, MAX_USERNAME_LENGTH - 1);
@@ -84,7 +88,9 @@ void save_ranking(Game* game) {
 
     FILE* write_file = fopen("ranking.txt", "w");
     if (!write_file) {
-        if (entries) free(entries);
+        if (entries) {
+            free(entries);
+        }
         return;
     }
 
@@ -93,5 +99,7 @@ void save_ranking(Game* game) {
     }
 
     fclose(write_file);
-    if (entries) free(entries);
+    if (entries) {
+        free(entries);
+    }
 }

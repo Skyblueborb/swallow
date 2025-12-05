@@ -26,15 +26,23 @@ int main() {
         handle_menu_choice(&game, choice);
     }
 
-    if (game.entities.hunters) free_hunters(&game);
-    if (game.entities.stars) free_stars(&game);
-    if (game.entities.swallow) free(game.entities.swallow);
+    if (game.entities.hunters) {
+        free_hunters(&game);
+    }
+    if (game.entities.stars) {
+        free_stars(&game);
+    }
+    if (game.entities.swallow) {
+        free(game.entities.swallow);
+    }
 
     delwin(game.main_win.window);
     delwin(game.status_win.window);
     endwin();
 
-    if (game.username) free(game.username);
+    if (game.username) {
+        free(game.username);
+    }
     free_config(&game.config);
 
     return 0;

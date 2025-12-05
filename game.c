@@ -90,11 +90,14 @@ static void handle_hunter_spawner(Game* game) {
     float reduction_factor =
             1.0f - ((elapsed / HUNTER_ESCALATION_FREQUENCY) * game->config.hunter_spawn_esc);
 
-    if (reduction_factor < MAX_REDUCTION_FACTOR) reduction_factor = MAX_REDUCTION_FACTOR;
+    if (reduction_factor < MAX_REDUCTION_FACTOR) {
+        reduction_factor = MAX_REDUCTION_FACTOR;
+    }
 
     float current_hunter_threshold = base_hunter_threshold * reduction_factor;
-    if (current_hunter_threshold < MAX_SPAWN_HUNTER_THRESHOLD)
+    if (current_hunter_threshold < MAX_SPAWN_HUNTER_THRESHOLD) {
         current_hunter_threshold = MAX_SPAWN_HUNTER_THRESHOLD;
+    }
 
     game->hunter_spawn_tick++;
     if (game->hunter_spawn_tick >= (int)current_hunter_threshold) {
@@ -146,7 +149,9 @@ static void check_game_over(Game* game) {
         game->entities.swallow->hp = 0;
     }
 
-    if (game->result != UNKNOWN) game->running = 0;
+    if (game->result != UNKNOWN) {
+        game->running = 0;
+    }
     game->score = calculate_score(game);
 }
 
@@ -160,8 +165,12 @@ static void reset_game_state(Game* game) {
     game->result = UNKNOWN;
     srand(game->config.seed);
 
-    if (game->entities.hunters != NULL) free_hunters(game);
-    if (game->entities.stars != NULL) free_stars(game);
+    if (game->entities.hunters != NULL) {
+        free_hunters(game);
+    }
+    if (game->entities.stars != NULL) {
+        free_stars(game);
+    }
 }
 
 void game_loop(Game* game) {
@@ -189,7 +198,9 @@ void game_loop(Game* game) {
     handle_star_spawner(game);
     if (game->albatross_cooldown > 0) {
         game->albatross_cooldown -= delta_seconds;
-        if (game->albatross_cooldown < 0) game->albatross_cooldown = 0;
+        if (game->albatross_cooldown < 0) {
+            game->albatross_cooldown = 0;
+        }
     }
     game->time_left -= delta_seconds;
     check_game_over(game);
@@ -243,7 +254,9 @@ void start_game(Game* game) {
 
     if (game->entities.swallow == NULL) {
         game->entities.swallow = (Swallow*)malloc(sizeof(Swallow));
-        if (!game->entities.swallow) exit(1);
+        if (!game->entities.swallow) {
+            exit(1);
+        }
     }
     init_swallow(game, game->entities.swallow);
 

@@ -11,8 +11,12 @@ static void get_spawn_coordinates(Game* game, entity_t* hunter_ent, const direct
     const int h = hunter_ent->height;
     int max_r = game->main_win.rows - h - 2;
     int max_c = game->main_win.cols - w - 2;
-    if (max_r <= 0) max_r = 1;
-    if (max_c <= 0) max_c = 1;
+    if (max_r <= 0) {
+        max_r = 1;
+    }
+    if (max_c <= 0) {
+        max_c = 1;
+    }
 
     int x = 2, y = 2;
 
@@ -72,7 +76,9 @@ static void setup_hunter_physics(Hunter* hun, const int x, const int y, const di
  */
 static Hunter* init_hunter_data(Game* game, const int template_idx) {
     Hunter* hun = (Hunter*)malloc(sizeof(Hunter));
-    if (!hun) return NULL;
+    if (!hun) {
+        return NULL;
+    }
 
     const HunterTypes* t = &game->config.hunter_templates[template_idx];
 
@@ -92,7 +98,9 @@ static Hunter* init_hunter_data(Game* game, const int template_idx) {
     hun->dash_cooldown = 0;
     hun->base_speed = t->speed;
 
-    for (int i = 0; i < NUM_DIRECTIONS; i++) hun->ent.anim_sprites[i] = NULL;
+    for (int i = 0; i < NUM_DIRECTIONS; i++) {
+        hun->ent.anim_sprites[i] = NULL;
+    }
     hun->ent.anim_frame = 0;
     hun->ent.anim_timer = 0;
 
@@ -106,12 +114,15 @@ void spawn_hunter(Game* game) {
     const direction_t dir = (direction_t)(rand() % NUM_DIRECTIONS);
 
     Hunter* new_hunter = init_hunter_data(game, t_idx);
-    if (!new_hunter) return;
+    if (!new_hunter) {
+        return;
+    }
 
     const float elapsed = game->config.timer - game->time_left;
     int bonus_bounces = 0;
-    if (game->config.hunter_bounce_esc > 0)
+    if (game->config.hunter_bounce_esc > 0) {
         bonus_bounces = (int)(elapsed / game->config.hunter_bounce_esc);
+    }
     new_hunter->bounces += bonus_bounces;
 
     get_spawn_coordinates(game, &new_hunter->ent, dir);
@@ -169,13 +180,18 @@ static int resolve_hunter_collision(Game* game, Hunter** curr, Hunter* prev,
             hit_y = 1;
         }
 
-        if (hit_x) h->ent.dx = -h->ent.dx;
-        if (hit_y) h->ent.dy = -h->ent.dy;
+        if (hit_x) {
+            h->ent.dx = -h->ent.dx;
+        }
+        if (hit_y) {
+            h->ent.dy = -h->ent.dy;
+        }
 
-        if (abs(h->ent.dx) > abs(h->ent.dy))
+        if (abs(h->ent.dx) > abs(h->ent.dy)) {
             h->ent.direction = (h->ent.dx > 0) ? DIR_RIGHT : DIR_LEFT;
-        else
+        } else {
             h->ent.direction = (h->ent.dy > 0) ? DIR_DOWN : DIR_UP;
+        }
 
         h->bounces--;
 
@@ -224,7 +240,9 @@ static int handle_hunter_logic(Hunter* h, const Swallow* s) {
             if (h->state_timer <= 0) {
                 h->state = HUNTER_DASHING;
                 h->ent.speed = (h->base_speed * 2);
-                if (h->ent.speed > 3) h->ent.speed = 2;
+                if (h->ent.speed > 3) {
+                    h->ent.speed = 2;
+                }
 
                 aim_at_target(&h->ent, &s->ent);
 

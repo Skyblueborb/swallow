@@ -25,19 +25,21 @@ void aim_at_target(entity_t* source, const entity_t* target) {
     const int dx = target->x - source->x;
     const int dy = target->y - source->y;
 
-    if (dx > 0)
+    if (dx > 0) {
         source->dx = source->speed;
-    else if (dx < 0)
+    } else if (dx < 0) {
         source->dx = -source->speed;
-    else
+    } else {
         source->dx = 0;
+    }
 
-    if (dy > 0)
+    if (dy > 0) {
         source->dy = source->speed;
-    else if (dy < 0)
+    } else if (dy < 0) {
         source->dy = -source->speed;
-    else
+    } else {
         source->dy = 0;
+    }
 
     if (abs(dx) > abs(dy)) {
         source->direction = (dx > 0) ? DIR_RIGHT : DIR_LEFT;
@@ -92,7 +94,9 @@ void remove_entity(Game* game, entity_t* ent) {
 
 void* remove_generic_node(Game* game, void** head_ref, void* current, void* prev,
                           const size_t next_offset, const size_t ent_offset) {
-    if (!current) return NULL;
+    if (!current) {
+        return NULL;
+    }
 
     entity_t* ent = (entity_t*)((char*)current + ent_offset);
     remove_entity(game, ent);
