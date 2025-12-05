@@ -29,7 +29,7 @@ void draw_sprite(Game* game, entity_t* entity) {
                 continue;
             }
 
-            const char sprite_char = sprite_grid[sprite_y * entity->width + sprite_x];
+            const char sprite_char = sprite_grid[(sprite_y * entity->width) + sprite_x];
 
             if (sprite_char != ' ') {
                 mvwaddch(win, screen_y, screen_x, sprite_char);

@@ -36,13 +36,13 @@ static void update_star_color(Game* game, Star* star) {
 
     const float star_progress = (float)y / (float)height;
 
-    if (star_progress < 0.2f) {
+    if (star_progress < 0.2F) {
         star->ent.color = C_YELLOW_5;
-    } else if (star_progress < 0.4f) {
+    } else if (star_progress < 0.4F) {
         star->ent.color = C_YELLOW_4;
-    } else if (star_progress < 0.6f) {
+    } else if (star_progress < 0.6F) {
         star->ent.color = C_YELLOW_3;
-    } else if (star_progress < 0.8f) {
+    } else if (star_progress < 0.8F) {
         star->ent.color = C_YELLOW_2;
     } else {
         star->ent.color = C_YELLOW_1;

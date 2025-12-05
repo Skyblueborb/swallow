@@ -94,7 +94,7 @@ static void parse_sprite(conf_t* config, const int hunter_idx, const char* key, 
         return;
     }
 
-    const size_t size = hunter->width * hunter->height + 1;
+    const size_t size = (hunter->width * hunter->height) + 1;
     if (hunter->sprites[0] == NULL) {
         for (int i = 0; i < NUM_DIRECTIONS; i++) {
             hunter->sprites[i] = (char*)malloc(size);
@@ -239,19 +239,19 @@ static void init_default_conf(conf_t* config) {
     config->window_height = 40;
     config->window_width = 80;
     config->star_quota = 10;
-    config->timer = 50.0f;
+    config->timer = 50.0F;
     config->star_quota = 3;
-    config->star_spawn = 4.0f;
-    config->hunter_spawn = 12.0f;
+    config->star_spawn = 4.0F;
+    config->hunter_spawn = 12.0F;
     config->min_speed = 1;
     config->max_speed = 5;
     config->seed = 2137;
-    config->score_time_weight = 20.0f;
-    config->score_stars_weight = 200.0f;
-    config->score_life_weight = 5.0f;
+    config->score_time_weight = 20.0F;
+    config->score_stars_weight = 200.0F;
+    config->score_life_weight = 5.0F;
     config->albatross_cooldown = 15;
-    config->hunter_spawn_esc = 0.05f;
-    config->hunter_bounce_esc = 5.0f;
+    config->hunter_spawn_esc = 0.05F;
+    config->hunter_bounce_esc = 5.0F;
 }
 
 conf_t read_config(const char* filename) {

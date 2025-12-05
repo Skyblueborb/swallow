@@ -88,7 +88,7 @@ static void handle_hunter_spawner(Game* game) {
 
     const float elapsed = game->config.timer - game->time_left;
     float reduction_factor =
-            1.0f - ((elapsed / HUNTER_ESCALATION_FREQUENCY) * game->config.hunter_spawn_esc);
+            1.0F - ((elapsed / HUNTER_ESCALATION_FREQUENCY) * game->config.hunter_spawn_esc);
 
     if (reduction_factor < MAX_REDUCTION_FACTOR) {
         reduction_factor = MAX_REDUCTION_FACTOR;
@@ -178,7 +178,7 @@ void game_loop(Game* game) {
         reset_game_state(game);
     }
     const unsigned int sleep_us = 66666 / game->game_speed;
-    const float delta_seconds = (float)sleep_us / 1000000.0f;
+    const float delta_seconds = (float)sleep_us / 1000000.0F;
 
     Swallow* swallow = game->entities.swallow;
     if (game->replay.replay_state == REPLAY_RECORDING) {

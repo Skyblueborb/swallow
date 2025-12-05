@@ -27,7 +27,7 @@ void show_high_scores(Game* game, const int row_start) {
 
     if (current == NULL) {
         const char* message = "So lonely here, go play the game!";
-        mvwprintw(win, row, center_x - (int)strlen(message) / 2, "%s", message);
+        mvwprintw(win, row, center_x - ((int)strlen(message) / 2), "%s", message);
     }
 
     while (current != NULL && row < game->main_win.rows - 1) {
@@ -184,7 +184,7 @@ void get_username(Game* game) {
 
     // strlen("Enter Username: ") = 16
     const int center_x = (cols - 16) / 2;
-    const int center_y = rows / 2 - CENTER_Y_OFFSET;
+    const int center_y = (rows / 2) - CENTER_Y_OFFSET;
 
     draw_main(game);
     mvwprintw(win, center_y, center_x, "Enter Username: ");
