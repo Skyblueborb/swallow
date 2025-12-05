@@ -29,6 +29,18 @@
 #define SWALLOW_SIZE 3
 #define SWALLOW_SPEED 1
 
+#define STAR_MOVE_TICKS 4
+#define STAR_SPEED_MAX 3
+
+#define GAME_OVER_INPUT_BLOCK 2000000
+
+#define BASE_SPAWNER_MULTIPLIER 10
+
+#define ANIMATION_TICKS 5
+
+#define ALBATROSS_TAXI_DURATION 20.0f
+#define SAFE_ZONE_PADDING 10
+
 typedef struct {
     WINDOW* window;
     int x, y, rows, cols;

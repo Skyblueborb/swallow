@@ -12,12 +12,6 @@
 #include "types.h"
 #include "utils.h"
 
-#define GAME_OVER_INPUT_BLOCK 2000000
-
-#define STAR_MOVE_TICKS 4
-
-#define BASE_SPAWNER_MULTIPLIER 10
-
 static void handle_game_input(Game* game, entity_t* swallow) {
     const int ch = tolower(getch());
 

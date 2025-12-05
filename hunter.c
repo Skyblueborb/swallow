@@ -203,7 +203,8 @@ static int resolve_hunter_collision(Game* game, Hunter** curr, Hunter* prev,
  * PAUSED: Waits for state_timer ticks, then charges (DASHING) at swallow.
  * DASHING: Moves fast until collision.
  *
- * Returns: 1 if movement should be skipped this tick (e.g. while Paused), 0 otherwise.
+ * RETURNS
+ * 1 if movement should be skipped this tick (hunter state is PAUSED), 0 otherwise.
  */
 static int handle_hunter_logic(Hunter* h, const Swallow* s) {
     if (h->dash_cooldown > 0) {

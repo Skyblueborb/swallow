@@ -95,7 +95,7 @@ void spawn_star(Game* game) {
     star->ent.height = 1;
     for (int i = 0; i < NUM_DIRECTIONS; i++) star->ent.sprites[i] = "*";
 
-    star->ent.speed = (rand() % 3) + 1;
+    star->ent.speed = (rand() % STAR_SPEED_MAX) + 1;
 
     int max_c = game->main_win.cols - star->ent.width - 2;
     if (max_c <= 0) max_c = 1;

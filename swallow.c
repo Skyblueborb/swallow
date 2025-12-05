@@ -6,11 +6,6 @@
 #include "star.h"
 #include "types.h"
 
-#define ANIMATION_TICKS 5
-
-#define ALBATROSS_TAXI_DURATION 20.0f
-#define SAFE_ZONE_PADDING 10
-
 static void handle_swallow_star(Game* game, Swallow* s) {
     Star* prev = NULL;
     const int tx = s->ent.x + s->ent.dx;
