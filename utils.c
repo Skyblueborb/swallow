@@ -1,7 +1,12 @@
-#include "utils.h"
 #include <dirent.h>
+#include <ncurses.h>
+#include <stddef.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
+
 #include "types.h"
+#include "utils.h"
 
 void strip_newline(char* str) {
     const size_t len = strlen(str);
@@ -126,7 +131,7 @@ void free_occupancy_map(Game* game) {
         for (int y = 0; y < rows; y++) {
             free(game->occupancy_map[y]);
         }
-        free(game->occupancy_map);
+        free((void*)game->occupancy_map);
         game->occupancy_map = NULL;
     }
 }
@@ -180,13 +185,13 @@ static int compare_levels(const void* a, const void* b) {
 int load_levels(char*** files) {
     DIR* d = opendir("levels");
     int count = 0;
-    struct dirent* dir;
+    struct dirent* dir = NULL;
 
     if (!d) return 0;
 
     while ((dir = readdir(d))) {
         if (strstr(dir->d_name, ".conf")) {
-            char** tmp = (char**)realloc(*files, sizeof(char*) * (count + 1));
+            char** tmp = (char**)realloc((void*)*files, sizeof(char*) * (count + 1));
             if (tmp) {
                 *files = tmp;
                 (*files)[count++] = strdup(dir->d_name);
@@ -196,7 +201,7 @@ int load_levels(char*** files) {
     closedir(d);
 
     if (*files && count > 1) {
-        qsort(*files, count, sizeof(char*), compare_levels);
+        qsort((void*)*files, count, sizeof(char*), compare_levels);
     }
     return count;
 }

@@ -1,7 +1,6 @@
 #include <stddef.h>
 #include <stdlib.h>
 #include <time.h>
-#include <unistd.h>
 
 #include "entity.h"
 #include "graphics.h"

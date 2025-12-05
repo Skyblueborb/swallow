@@ -1,9 +1,12 @@
 #include <ncurses.h>
+#include <stddef.h>
+#include <stdlib.h>
 #include <string.h>
+
 #include "types.h"
 
 void draw_sprite(Game* game, entity_t* entity) {
-    char* sprite_grid;
+    char const* sprite_grid = NULL;
     if (entity->anim_frame == 1 && entity->anim_sprites[entity->direction] != NULL) {
         sprite_grid = entity->anim_sprites[entity->direction];
     } else {
@@ -84,7 +87,7 @@ void draw_ascii_art(Game* game, const int center_x, const int art_start_y, const
 
     wattron(win, COLOR_PAIR(color));
     for (int i = 0; i < art_lines; i++) {
-        const int len = mbstowcs(NULL, ascii_art[i], 0);
+        const int len = (int)mbstowcs(NULL, ascii_art[i], 0);
         int x = center_x - (len / 2);
         if (x < 1) x = 1;
         mvwprintw(win, art_start_y + i, x, "%s", ascii_art[i]);
@@ -111,8 +114,8 @@ void draw_logo(Game* game, const int center_x, const int art_start_y) {
     draw_ascii_art(game, center_x, art_start_y, logo_art, logo_lines, PAIR_PLAYER);
 }
 
-void draw_game_over(Game* game, const int center_x, const int art_start_y) {
-    const char* win_art[] = {
+static const char** get_win_logo(int *count) {
+    static const char* win_art[] = {
             "          _______                      _______  _        _ ",
             "|\\     /|(  ___  )|\\     /|  |\\     /|(  ___  )( (    /|( )",
             "( \\   / )| (   ) || )   ( |  | )   ( || (   ) ||  \\  ( || |",
@@ -122,8 +125,12 @@ void draw_game_over(Game* game, const int center_x, const int art_start_y) {
             "   | |   | (___) || (___) |  | () () || (___) || )  \\  | _ ",
             "   \\_/   (_______)(_______)  (_______)(_______)|/    )_)(_)",
     };
+    *count = sizeof(win_art) / sizeof(win_art[0]);
+    return win_art;
+}
 
-    const char* lose_art[] = {
+static const char** get_lose_logo(int *count) {
+    static const char* lose_art[] = {
             "          _______             _        _______  _______  _______          ",
             "|\\     /|(  ___  )|\\     /|  ( \\      (  ___  )(  ____ \\(  ____ \\         ",
             "( \\   / )| (   ) || )   ( |  | (      | (   ) || (    \\/| (    \\/         ",
@@ -133,12 +140,19 @@ void draw_game_over(Game* game, const int center_x, const int art_start_y) {
             "   | |   | (___) || (___) |  | (____/\\| (___) |/\\____) || (____/\\  _  _  _ ",
             "   \\_/   (_______)(_______)  (_______/(_______)\\_______)(_______/ (_)(_)(_)"};
 
+    *count = sizeof(lose_art) / sizeof(lose_art[0]);
+    return lose_art;
+}
+
+void draw_game_over(Game* game, const int center_x, const int art_start_y) {
+    int art_lines = 0;
+
     if (game->result == WINNER) {
-        const int art_lines = sizeof(win_art) / sizeof(win_art[0]);
-        draw_ascii_art(game, center_x, art_start_y, win_art, art_lines, C_GREEN_5);
+        const char **logo = get_win_logo(&art_lines);
+        draw_ascii_art(game, center_x, art_start_y, logo, art_lines, C_GREEN_5);
     } else {
-        const int art_lines = sizeof(lose_art) / sizeof(lose_art[0]);
-        draw_ascii_art(game, center_x, art_start_y, lose_art, art_lines, C_RED_5);
+        const char **logo = get_lose_logo(&art_lines);
+        draw_ascii_art(game, center_x, art_start_y, logo, art_lines, C_RED_5);
     }
 }
 

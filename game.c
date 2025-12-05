@@ -1,4 +1,6 @@
 #include <ctype.h>
+#include <ncurses.h>
+#include <stdlib.h>
 #include <unistd.h>
 
 #include "conf.h"
@@ -54,7 +56,7 @@ static void handle_star_movement(Game* game) {
 }
 
 static void handle_star_spawner(Game* game) {
-    const int star_spawn_threshold = game->config.star_spawn * BASE_SPAWNER_MULTIPLIER;
+    const int star_spawn_threshold = (int)(game->config.star_spawn * BASE_SPAWNER_MULTIPLIER);
 
     game->star_spawn_tick++;
     if (game->star_spawn_tick >= star_spawn_threshold) {
@@ -67,26 +69,26 @@ static void handle_star_spawner(Game* game) {
  * handle_hunter_spawner - Manages hunter generation with difficulty scaling
  * @game: Main game struct
  *
- * Calculates how often a hunter should be spawned based on hunter_spawn_escalation.
+ * Calculates how often a hunter should be spawned based on hunter_spawn_esc.
  * Subsequently it spawns the hunter if enough ticks has passed.
  *
  * RETURNS
  * Void.
  */
 static void handle_hunter_spawner(Game* game) {
-    const float base_hunter_threshold = game->config.hunter_spawn * 10;
+    const float base_hunter_threshold = game->config.hunter_spawn * BASE_SPAWNER_MULTIPLIER;
 
     const float elapsed = game->config.timer - game->time_left;
     float reduction_factor =
-            1.0f - ((elapsed / HUNTER_ESCALATION_FREQUENCY) * game->config.hunter_spawn_escalation);
+            1.0f - ((elapsed / HUNTER_ESCALATION_FREQUENCY) * game->config.hunter_spawn_esc);
 
-    if (reduction_factor < 0.2f) reduction_factor = 0.2f;
+    if (reduction_factor < MAX_REDUCTION_FACTOR) reduction_factor = MAX_REDUCTION_FACTOR;
 
     float current_hunter_threshold = base_hunter_threshold * reduction_factor;
-    if (current_hunter_threshold < 5) current_hunter_threshold = 5;
+    if (current_hunter_threshold < MAX_SPAWN_HUNTER_THRESHOLD) current_hunter_threshold = MAX_SPAWN_HUNTER_THRESHOLD;
 
     game->hunter_spawn_tick++;
-    if (game->hunter_spawn_tick >= current_hunter_threshold) {
+    if (game->hunter_spawn_tick >= (int)current_hunter_threshold) {
         game->hunter_spawn_tick = 0;
         spawn_hunter(game);
     }
@@ -103,15 +105,15 @@ static void handle_hunter_spawner(Game* game) {
  * Calculated score presented as an integer.
  */
 static int calculate_score(Game* game) {
-    float score = 0;
-    score += game->stars_collected * game->config.score_stars_weight;
+    int score = 0;
+    score += (int)((float)game->stars_collected * game->config.score_stars_weight);
     if (game->result == WINNER) {
-        score += game->entities.swallow->hp * game->config.score_life_weight;
-        score += game->time_left * game->config.score_time_weight;
+        score += (int)((float)game->entities.swallow->hp * game->config.score_life_weight);
+        score += (int)((float)game->time_left * game->config.score_time_weight);
         score *= game->config.level_nr * game->result;
     }
 
-    return (int)score;
+    return score;
 }
 
 /**
@@ -200,7 +202,7 @@ void start_game(Game* game) {
     game->running = 1;
     game->game_speed = game->config.min_speed;
     game->time_left = game->config.timer;
-    game->score = 0.f;
+    game->score = 0;
 
     if (game->entities.swallow == NULL) {
         game->entities.swallow = (Swallow*)malloc(sizeof(Swallow));
@@ -223,7 +225,7 @@ void end_game(Game* game) {
     setup_menu_window(&game->main_win);
     nodelay(game->main_win.window, FALSE);
     draw_game_over(game, game->main_win.cols / 2, 1);
-    show_high_scores(game, 10);
+    show_high_scores(game, GAME_OVER_HIGH_SCORE_Y_OFFSET);
     flushinp();
     usleep(GAME_OVER_INPUT_BLOCK);
     wgetch(game->main_win.window);

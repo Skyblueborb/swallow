@@ -1,12 +1,13 @@
 #include <locale.h>
+#include <ncurses.h>
+#include <stdlib.h>
 
 #include "conf.h"
-#include "types.h"
-#include "utils.h"
-
 #include "hunter.h"
 #include "menu.h"
 #include "star.h"
+#include "types.h"
+#include "utils.h"
 
 int main() {
     setlocale(LC_ALL, "");

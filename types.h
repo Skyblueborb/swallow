@@ -1,9 +1,7 @@
 #ifndef TYPES_H
 #define TYPES_H
 
-#include <curses.h>
-#include <inttypes.h>
-#include <stdlib.h>
+#include <ncurses.h>
 
 #define MAX_SAFE_ZONE_ATTEMPTS 50
 
@@ -38,8 +36,28 @@
 
 #define ANIMATION_TICKS 5
 
+#define TAXI_ANIMATION_TICK_SPEED 30000
 #define ALBATROSS_TAXI_DURATION 20.0f
 #define SAFE_ZONE_PADDING 10
+
+#define MENU_STAR_AMOUNT 5
+
+#define CENTER_Y_OFFSET 10
+#define CENTER_X_OFFSET 10
+
+#define LOGO_START 1
+
+#define MAX_LINE_LENGTH 256
+
+#define MAX_REDUCTION_FACTOR 0.2f
+
+#define MAX_SPAWN_HUNTER_THRESHOLD 5
+
+#define GAME_OVER_HIGH_SCORE_Y_OFFSET 10
+
+#define MENU_TICK_SPEED 50000
+
+#define LEVEL_SELECT_X_OFFSET 20
 
 typedef struct {
     WINDOW* window;
@@ -156,8 +174,8 @@ typedef struct {
     float score_stars_weight;
     float score_life_weight;
     float albatross_cooldown;
-    float hunter_spawn_escalation;
-    float hunter_bounce_escalation;
+    float hunter_spawn_esc;
+    float hunter_bounce_esc;
     HunterTypes* hunter_templates;
 } conf_t;
 

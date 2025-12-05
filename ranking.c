@@ -1,6 +1,8 @@
+#include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
 #include "types.h"
 
 typedef struct {
@@ -21,8 +23,8 @@ const RankingNode* load_rankings() {
     const RankingNode* head = NULL;
     RankingNode* tail = NULL;
 
-    int score;
-    char name[MAX_USERNAME_LENGTH];
+    int score = 0;
+    char name[MAX_USERNAME_LENGTH] = { 0 };
 
     while (fscanf(file, "%d %49s", &score, name) == 2) {
         RankingNode* new_node = (RankingNode*)malloc(sizeof(RankingNode));
@@ -61,8 +63,8 @@ void save_ranking(Game* game) {
 
     FILE* read_file = fopen("ranking.txt", "r");
     if (read_file) {
-        int temp_score;
-        char temp_name[50];
+        int temp_score = 0;
+        char temp_name[MAX_USERNAME_LENGTH] = { 0 };
         while (fscanf(read_file, "%d %49s", &temp_score, temp_name) == 2) {
             entries = (SortEntry*)realloc(entries, sizeof(SortEntry) * (count + 1));
             entries[count].score = temp_score;
@@ -74,8 +76,8 @@ void save_ranking(Game* game) {
 
     entries = (SortEntry*)realloc(entries, sizeof(SortEntry) * (count + 1));
     entries[count].score = (int)game->score;
-    strncpy(entries[count].username, game->username, 49);
-    entries[count].username[49] = '\0';
+    strncpy(entries[count].username, game->username, MAX_USERNAME_LENGTH - 1);
+    entries[count].username[MAX_USERNAME_LENGTH - 1] = '\0';
     count++;
 
     qsort(entries, count, sizeof(SortEntry), compare_scores);

@@ -1,13 +1,9 @@
 #include <stddef.h>
+#include <stdlib.h>
 
 #include "entity.h"
 #include "physics.h"
 #include "types.h"
-
-static void handle_collection(Game* game) {
-    game->stars_collected++;
-    game->score += game->config.score_stars_weight;
-}
 
 Star* remove_star(Game* game, Star* current, Star* prev) {
     return (Star*)remove_generic_node(game, (void**)&game->entities.stars, current, prev,
@@ -21,7 +17,7 @@ void collect_stars(Game* game) {
 
     while (current != NULL) {
         if (is_touching(&current->ent, &swallow->ent)) {
-            handle_collection(game);
+            game->stars_collected++;
             current = remove_star(game, current, prev);
         } else {
             prev = current;
@@ -36,7 +32,7 @@ static void update_star_color(Game* game, Star* star) {
 
     if (height == 0) return;
 
-    const float star_progress = (float)y / height;
+    const float star_progress = (float)y / (float)height;
 
     if (star_progress < 0.2f) {
         star->ent.color = C_YELLOW_5;
@@ -68,7 +64,7 @@ void move_stars(Game* game) {
         if (s_bot >= t_top && s_top <= t_bot &&
             current->ent.x < swallow->ent.x + swallow->ent.width &&
             current->ent.x + current->ent.width > swallow->ent.x) {
-            handle_collection(game);
+            game->stars_collected++;
             current = remove_star(game, current, prev);
             continue;
         }
@@ -77,7 +73,7 @@ void move_stars(Game* game) {
 
         if (ret != EMPTY) {
             if (ret == SWALLOW) {
-                handle_collection(game);
+                game->stars_collected++;
             }
             current = remove_star(game, current, prev);
         } else {

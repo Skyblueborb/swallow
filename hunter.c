@@ -110,8 +110,8 @@ void spawn_hunter(Game* game) {
 
     const float elapsed = game->config.timer - game->time_left;
     int bonus_bounces = 0;
-    if (game->config.hunter_bounce_escalation > 0)
-        bonus_bounces = (int)(elapsed / game->config.hunter_bounce_escalation);
+    if (game->config.hunter_bounce_esc > 0)
+        bonus_bounces = (int)(elapsed / game->config.hunter_bounce_esc);
     new_hunter->bounces += bonus_bounces;
 
     get_spawn_coordinates(game, &new_hunter->ent, dir);

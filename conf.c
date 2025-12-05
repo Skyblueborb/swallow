@@ -52,8 +52,8 @@ static const ConfigMapEntry* get_global_key_map(int* count) {
             {"score_stars_weight", offsetof(conf_t, score_stars_weight), TYPE_FLOAT},
             {"score_life_weight", offsetof(conf_t, score_life_weight), TYPE_FLOAT},
             {"albatross_cooldown", offsetof(conf_t, albatross_cooldown), TYPE_FLOAT},
-            {"hunter_spawn_escalation", offsetof(conf_t, hunter_spawn_escalation), TYPE_FLOAT},
-            {"hunter_bounce_escalation", offsetof(conf_t, hunter_bounce_escalation), TYPE_FLOAT}};
+            {"hunter_spawn_esc", offsetof(conf_t, hunter_spawn_esc), TYPE_FLOAT},
+            {"hunter_bounce_esc", offsetof(conf_t, hunter_bounce_esc), TYPE_FLOAT}};
     *count = sizeof(map) / sizeof(map[0]);
     return map;
 }
@@ -132,7 +132,7 @@ static void parse_sprite(conf_t* config, const int hunter_idx, const char* key, 
  * The corresponding integer color pair ID, or PAIR_DEFAULT if not found.
  */
 static ColorPair parse_color_name(const char* value) {
-    int count;
+    int count = 0;
     const ColorNameEntry* map = get_color_map(&count);
 
     for (int i = 0; i < count; i++) {
@@ -158,15 +158,15 @@ static ColorPair parse_color_name(const char* value) {
  * Void.
  */
 static void parse_values(conf_t* config, const int hunter_idx, const char* key, const char* value) {
-    void* base_ptr;
-    const ConfigMapEntry* map;
-    int count;
+    void* base_ptr = NULL;
+    const ConfigMapEntry* map = NULL;
+    int count = 0;
 
     if (hunter_idx < 0) {
         base_ptr = config;
         map = get_global_key_map(&count);
     } else {
-        if (strncmp(key, "sprite", 6) == 0) {
+        if (strncmp(key, "sprite", strlen("sprite")) == 0) {
             parse_sprite(config, hunter_idx, key, value);
             return;
         }
@@ -181,7 +181,7 @@ static void parse_values(conf_t* config, const int hunter_idx, const char* key, 
             if (map[i].type == TYPE_INT) {
                 *(int*)target = atoi(value);
             } else if (map[i].type == TYPE_FLOAT) {
-                *(float*)target = atof(value);
+                *(float*)target = (float)atof(value);
             } else if (map[i].type == TYPE_COLOR) {
                 *(ColorPair*)target = parse_color_name(value);
             }
@@ -230,7 +230,7 @@ static void init_default_conf(conf_t* config) {
     config->window_width = 80;
     config->star_quota = 10;
     config->timer = 50.0f;
-    config->star_quota = 3.0f;
+    config->star_quota = 3;
     config->hunter_spawn = 12.0f;
     config->min_speed = 1;
     config->max_speed = 5;
@@ -239,8 +239,8 @@ static void init_default_conf(conf_t* config) {
     config->score_stars_weight = 200.0f;
     config->score_life_weight = 5.0f;
     config->albatross_cooldown = 15;
-    config->hunter_spawn_escalation = 0.05f;
-    config->hunter_bounce_escalation = 5.0f;
+    config->hunter_spawn_esc = 0.05f;
+    config->hunter_bounce_esc = 5.0f;
 }
 
 conf_t read_config(const char* filename) {
@@ -256,7 +256,7 @@ conf_t read_config(const char* filename) {
     // When a `hunter_template` is detected we stop looking
     // for global keys and we parse only hunter templates.
     int hunter_index = -1;
-    char line[256] = {0};
+    char line[MAX_LINE_LENGTH] = {0};
 
     while (fgets(line, sizeof(line), file)) {
         strip_newline(line);

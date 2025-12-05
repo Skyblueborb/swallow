@@ -1,4 +1,7 @@
+#include <ncurses.h>
+#include <stdlib.h>
 #include <unistd.h>
+
 #include "entity.h"
 #include "graphics.h"
 #include "hunter.h"
@@ -123,10 +126,10 @@ static void draw_static_scene(Game* game) {
 }
 
 static void run_taxi_animation(Game* game, entity_t* taxi, int target_x, int target_y) {
-    float cur_x = taxi->x;
-    float cur_y = taxi->y;
-    const float dx = (target_x - cur_x) / ALBATROSS_TAXI_DURATION;
-    const float dy = (target_y - cur_y) / ALBATROSS_TAXI_DURATION;
+    float cur_x = (float)taxi->x;
+    float cur_y = (float)taxi->y;
+    const float dx = ((float)target_x - cur_x) / ALBATROSS_TAXI_DURATION;
+    const float dy = ((float)target_y - cur_y) / ALBATROSS_TAXI_DURATION;
 
     for (int i = 0; i < 20; i++) {
         remove_sprite(game, taxi);
@@ -141,7 +144,7 @@ static void run_taxi_animation(Game* game, entity_t* taxi, int target_x, int tar
         draw_sprite(game, taxi);
         wnoutrefresh(game->main_win.window);
         doupdate();
-        usleep(30000);
+        usleep(TAXI_ANIMATION_TICK_SPEED);
     }
     remove_sprite(game, taxi);
 }
@@ -201,7 +204,7 @@ void call_albatross_taxi(Game* game) {
     if (game->albatross_cooldown > 0) return;
 
     Swallow* s = game->entities.swallow;
-    int safe_x, safe_y;
+    int safe_x = 0, safe_y = 0;
 
     find_safe_zone(game, &safe_x, &safe_y, s->ent.width, s->ent.height);
     if (safe_x == -1) return;

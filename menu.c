@@ -1,16 +1,17 @@
+#include <ncurses.h>
+#include <stddef.h>
 #include <stdio.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+
 #include "game.h"
 #include "graphics.h"
 #include "ranking.h"
 #include "star.h"
 #include "types.h"
 #include "utils.h"
-
-#define MENU_STAR_AMOUNT 5
-
-#define CENTER_Y_OFFSET 10
 
 void show_high_scores(Game* game, const int row_start) {
     WINDOW* win = game->main_win.window;
@@ -27,13 +28,13 @@ void show_high_scores(Game* game, const int row_start) {
 
     if (current == NULL) {
         const char* message = "So lonely here, go play the game!";
-        mvwprintw(win, row, center_x - strlen(message) / 2, "%s", message);
+        mvwprintw(win, row, center_x - (int)strlen(message) / 2, "%s", message);
     }
 
     while (current != NULL && row < game->main_win.rows - 1) {
-        char* buf;
+        char* buf = NULL;
         asprintf(&buf, "%d) %d - %s", index, current->score, current->username);
-        const int length = strlen(buf);
+        const int length = (int)strlen(buf);
         mvwprintw(win, row, center_x - (length / 2), "%s", buf);
         free(buf);
         row++;
@@ -99,10 +100,10 @@ static void draw_menu_options(WINDOW* win, const int selection, const int num_op
     for (int i = 0; i < num_options; i++) {
         if (i == selection) {
             wattron(win, A_REVERSE | A_BOLD);
-            mvwprintw(win, start_y + (i * 2), center_x - 10, "-> %s", options[i]);
+            mvwprintw(win, start_y + (i * 2), center_x - CENTER_X_OFFSET, "-> %s", options[i]);
             wattroff(win, A_REVERSE | A_BOLD);
         } else {
-            mvwprintw(win, start_y + (i * 2), center_x - 10, "   %s", options[i]);
+            mvwprintw(win, start_y + (i * 2), center_x - CENTER_X_OFFSET, "   %s", options[i]);
         }
     }
 }
@@ -140,10 +141,10 @@ MenuOption show_start_menu(Game* game) {
         draw_menu_stars(game, win);
 
         const int center_x = game->main_win.cols / 2;
-        const int art_start_y = 1;
+        const int art_start_y = LOGO_START;
         draw_logo(game, center_x, art_start_y);
 
-        const int menu_start_y = art_start_y + 10;
+        const int menu_start_y = art_start_y + CENTER_Y_OFFSET;
         draw_menu_options(win, selection, num_options, options, menu_start_y, center_x);
 
         if (game->username) {
@@ -156,7 +157,7 @@ MenuOption show_start_menu(Game* game) {
             break;
         }
 
-        usleep(50000);
+        usleep(MENU_TICK_SPEED);
     }
 
     cleanup_menu_stars(game);
@@ -216,12 +217,12 @@ char* select_level(Game* game) {
     const int count = load_levels(&files);
 
     if (count == 0) {
-        if (files) free(files);
+        if (files) free((void*)files);
         return strdup("config.txt");
     }
 
     WINDOW* win = game->main_win.window;
-    int sel = 0, c, cx = (game->main_win.cols - 20) / 2;
+    int sel = 0, c = 0, cx = (game->main_win.cols - LEVEL_SELECT_X_OFFSET) / 2;
 
     nodelay(game->main_win.window, FALSE);
     keypad(win, TRUE);
@@ -249,11 +250,11 @@ char* select_level(Game* game) {
             break;
     }
 
-    char* res;
+    char* res = NULL;
     asprintf(&res, "levels/%s", files[sel]);
 
     for (int i = 0; i < count; i++) free(files[i]);
-    free(files);
+    free((void*)files);
 
     nodelay(game->main_win.window, TRUE);
     keypad(win, FALSE);

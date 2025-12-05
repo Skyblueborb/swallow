@@ -1,4 +1,5 @@
 #include <stddef.h>
+
 #include "types.h"
 
 void update_occupancy_map(char** occupancy_map, int rows, int cols, entity_t* ent,

@@ -3,7 +3,7 @@ CC = clang
 
 NCURSES_PREFIX = $(shell brew --prefix ncurses)
 
-CFLAGS = -O0 -g -Wall -Werror -Wextra -I$(NCURSES_PREFIX)/include
+CFLAGS = -O0 -g -Wall -Werror -Wextra -Wpedantic -I$(NCURSES_PREFIX)/include -std=c23
 LDFLAGS = -L$(NCURSES_PREFIX)/lib
 
 LDLIBS = -lncursesw
