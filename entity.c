@@ -73,12 +73,12 @@ int check_intercept_course(const entity_t* h, const entity_t* s) {
  * process_entity_tick - Actions every entity should do each tick.
  * @game: Main game struct
  * @ent: The entity to update
- * @representation: Map character to set (e.g. 'H')
+ * @representation: collision_t that determines the type of entity
  *
  * RETURNS
  * Collision result (e.g. EMPTY, WALL)
  */
-collision_t process_entity_tick(Game* game, entity_t* ent, const char representation) {
+collision_t process_entity_tick(Game* game, entity_t* ent, const collision_t representation) {
     remove_entity(game, ent);
     const collision_t ret = attempt_move_entity(game, ent);
     update_occupancy_map(game->occupancy_map, game->main_win.rows, game->main_win.cols, ent,

@@ -287,7 +287,7 @@ void start_game(Game* game) {
         game_loop(game);
     }
 
-    if(game->replay.replay_state != REPLAY_PLAYING) {
+    if (game->replay.replay_state != REPLAY_PLAYING) {
         save_ranking(game);
     }
 
