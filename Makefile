@@ -1,4 +1,4 @@
-SRC = main.c utils.c conf.c graphics.c physics.c entity.c swallow.c hunter.c star.c ranking.c menu.c game.c replay.c
+SRC = main.c utils.c conf.c graphics.c physics.c entity.c swallow.c hunter.c star.c ranking.c menu.c game.c
 CC = clang
 
 NCURSES_PREFIX = $(shell brew --prefix ncurses)

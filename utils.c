@@ -62,7 +62,7 @@ static void init_game_colors() {
 
 void init_curses() {
     if (initscr() == NULL) {
-        fprintf(stderr, "Failed to initialize ncurses\n");
+        printf("Failed to initialize ncurses\n");
         exit(1);
     }
     if (!has_colors() && COLORS < 256) {
@@ -144,7 +144,6 @@ void init_occupancy_map(Game* game) {
 
     if (game->occupancy_map == NULL) {
         endwin();
-        fprintf(stderr, "Fatal Error: Failed to allocate memory for map rows.\n");
         exit(1);
     }
 
@@ -152,7 +151,6 @@ void init_occupancy_map(Game* game) {
         game->occupancy_map[y] = (char*)malloc(cols * sizeof(char));
         if (game->occupancy_map[y] == NULL) {
             endwin();
-            fprintf(stderr, "Fatal Error: Failed to allocate memory for map columns.\n");
             free_occupancy_map(game);
             exit(1);
         }
