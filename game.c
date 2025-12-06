@@ -287,7 +287,9 @@ void start_game(Game* game) {
         game_loop(game);
     }
 
-    save_ranking(game);
+    if(game->replay.replay_state != REPLAY_PLAYING) {
+        save_ranking(game);
+    }
 
     free_hunters(game);
     free_stars(game);
