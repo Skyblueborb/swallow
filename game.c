@@ -144,7 +144,7 @@ static int calculate_score(Game* game) {
     score += (int)((float)game->stars_collected * game->config.score_stars_weight);
     if (game->result == WINNER) {
         score += (int)((float)game->entities.swallow->hp * game->config.score_life_weight);
-        score += (int)((float)game->time_left * game->config.score_time_weight);
+        score += (int)(game->time_left * game->config.score_time_weight);
         score *= game->config.level_nr * game->result;
     }
 

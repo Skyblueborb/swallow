@@ -68,7 +68,7 @@ void draw_status(Game* game) {
               game->stars_collected, game->config.star_quota, game->time_left);
     mvwprintw(win, 3, 2, "Game speed: %-3d", game->game_speed);
     mvwprintw(win, 4, 2, "Taxi cooldown: %.1f ", game->albatross_cooldown);
-    mvwprintw(win, 5, 2, "Score: %-10d", (int)game->score);
+    mvwprintw(win, 5, 2, "Score: %-10d", game->score);
     wattroff(win, A_BOLD);
     wnoutrefresh(win);
 }

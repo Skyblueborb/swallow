@@ -79,7 +79,7 @@ void save_ranking(Game* game) {
     }
 
     entries = (SortEntry*)realloc(entries, sizeof(SortEntry) * (count + 1));
-    entries[count].score = (int)game->score;
+    entries[count].score = game->score;
     strncpy(entries[count].username, game->username, MAX_USERNAME_LENGTH - 1);
     entries[count].username[MAX_USERNAME_LENGTH - 1] = '\0';
     count++;
